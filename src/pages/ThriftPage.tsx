@@ -14,7 +14,7 @@ interface ThriftItem {
   image_url?: string;
   user_email: string;
   created_at: string;
-  status: string; // default 'available' in Supabase
+  status: 'available' | 'pending' | 'sold'; // default 'available' in Supabase
   user_id: string; // uuid in Supabase
 }
 

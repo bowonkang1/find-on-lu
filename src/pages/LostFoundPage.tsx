@@ -15,7 +15,7 @@ interface LostFoundItem {
   image_url?: string;
   date: string;
   user_id: string; 
-  status: string;
+  status: 'active' | 'found' | 'closed';
 }
 
 export function LostFoundPage() {

@@ -1,8 +1,67 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { supabase } from '../lib/supabase';
 
 export function DashboardPage() {
+  //add state for real data
+  const [stats, setStats] = useState({
+    lostItems: 0, //tracks how many items were reported as lost
+    foundItems: 0, //tracks how many items were found
+    thriftItems: 0, //tracks how many thrift items exist
+    itemsReunited: 0, //tracks how many lost items were matched with their owners
+    loading: true //data is being fetched or not yet loaded
+  });
+
+  //fetch real data
+  useEffect(() => {
+    fetchStats();
+  }, []); //[]-> run one time only
+
+  const fetchStats = async() => { //fechStats-> retrieves data from a supabase and updates web stats
+    try{
+      //destructurig + renaming
+      const { count: lostCount } = await supabase
+      .from('lost_found')
+      .select('*', { count: 'exact', head: true })
+      //*-> data I want to select, 
+      //exact-> Return the exact number of rows that match the filters
+      //head:true-> Only return the countnot actual rows
+      .eq('type', 'lost')
+      .eq('status', 'active');
+
+      //count found items
+      const { count: foundCount } = await supabase
+        .from('lost_found')
+        .select('*', { count: 'exact', head: true })
+        .eq('type', 'found')
+        .eq('status', 'active');
+
+      // Count thrift items (available only)
+      const { count: thriftCount } = await supabase
+        .from('thrift')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'available');
+
+      // Count reunited items (all time)
+      const { count: reunitedCount } = await supabase
+        .from('lost_found')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'found');
+
+        setStats({
+          lostItems: lostCount || 0, //
+          foundItems: foundCount || 0,
+          thriftItems: thriftCount || 0,
+          itemsReunited: reunitedCount || 0,
+          loading: false
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        setStats(prev => ({ ...prev, loading: false }));
+      }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="text-center mb-8">

@@ -384,6 +384,13 @@ export function MyPostsPage() {
                               required
                             />
                           </div>
+                          {/* Description (image change)*/}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                            <p className="text-sm text-blue-800">
+                              💡 <strong>Note:</strong> To change the image,
+                              delete this post and create a new one.
+                            </p>
+                          </div>
 
                           {/* Thrift-specific fields */}
                           {"price" in editingItem && (

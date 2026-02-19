@@ -14,20 +14,21 @@ interface ItemDetailsModalProps {
     condition?: string;
     category?: string;
     // Lost&Found-specific (optional)
-    type?: 'lost' | 'found';
+    type?: "lost" | "found";
     location?: string;
-    date?: string; 
+    date?: string;
   };
   onClose: () => void;
 }
 export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
-     // Get poster name from email
-  const posterName = item.user_email.split('@')[0];
+  // Get poster name from email
 
-   // Format date - use 'date' if it exists (Lost&Found), otherwise use created_at
-   const displayDate = item.date
-   ? new Date(item.date).toLocaleDateString()
-   : new Date(item.created_at).toLocaleDateString();
+  const posterName = item.user_email.split("@")[0];
+
+  // Format date - use 'date' if it exists (Lost&Found), otherwise use created_at
+  const displayDate = item.date
+    ? new Date(item.date).toLocaleDateString()
+    : new Date(item.created_at).toLocaleDateString();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -54,17 +55,23 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
 
         {/* Image */}
         {item.image_url && (
-          <img
-            src={item.image_url}
-            alt={item.title}
-            className="w-full h-67 object-cover rounded-lg mb-4"
-          />
+          <div className="w-full max-w-lg mx-auto mb-4">
+            <img
+              src={item.image_url}
+              alt={item.title}
+              className="w-full h-80 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(item.image_url, "_blank")}
+              title="Click to view full size"
+            />
+          </div>
         )}
 
         {/* Title and Price */}
         <h2 className="text-2xl font-bold mb-2">{item.title}</h2>
         {item.price !== undefined && (
-            <p className="text-3xl font-bold text-green-600 mb-4">${item.price}</p>
+          <p className="text-3xl font-bold text-green-600 mb-4">
+            ${item.price}
+          </p>
         )}
 
         {/* Full Description */}
@@ -127,7 +134,7 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
             <p className="font-medium">{displayDate}</p>
           </div>
           <div>
-             <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500">
               {item.price !== undefined ? "Seller" : "Posted by"}
             </p>
             <p className="font-medium">{posterName}</p>
@@ -138,9 +145,9 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
         <Button
           className="w-full"
           onClick={() => {
-            const subject = item.type 
-            ? `About your ${item.type} item: ${item.title}`
-            : `Interested in: ${item.title}`;
+            const subject = item.type
+              ? `About your ${item.type} item: ${item.title}`
+              : `Interested in: ${item.title}`;
 
             const body = item.price
               ? `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`
@@ -148,9 +155,9 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
 
             const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${
               item.user_email
-            }&subject=${encodeURIComponent(
-              subject
-            )}&body=${encodeURIComponent(body)}`;
+            }&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
+              body
+            )}`;
             window.open(outlookUrl, "_blank");
           }}
         >

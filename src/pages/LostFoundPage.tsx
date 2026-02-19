@@ -40,8 +40,6 @@ export function LostFoundPage() {
       console.log('📦 Received from Supabase:', data);
       console.log('📊 Item count:', data?.length);
 
-
-
       setItems(data || []);
       setError('');
     }catch (err: any) {

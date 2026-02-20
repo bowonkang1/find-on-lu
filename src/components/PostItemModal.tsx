@@ -78,11 +78,17 @@ export function PostItemModal({
 
       console.log('✅ Item saved to database:', savedItem);
       console.log('🔑 OpenAI key exists?', !!process.env.REACT_APP_OPENAI_API_KEY);
+      alert('CHECKPOINT 1: Item saved');
+      console.log('🔍 CHECKPOINT 1: Item saved');
+      console.log('🔍 type:', type);
+      console.log('🔍 formData.itemType:', formData.itemType);
 
       // ============================================
       // 🤖 AI MATCHING FOR FOUND ITEMS
       // ============================================
       if (type === 'lost-found' && formData.itemType === 'found') {
+        alert('CHECKPOINT 2: Inside AI block!');  // ADD THIS
+        console.log('🔍 CHECKPOINT 2: Inside AI block!');
         try {
           console.log('🤖 Starting AI matching...');
           

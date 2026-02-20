@@ -77,6 +77,7 @@ export function PostItemModal({
       }
 
       console.log('✅ Item saved to database:', savedItem);
+      console.log('🔑 OpenAI key exists?', !!process.env.REACT_APP_OPENAI_API_KEY);
 
       // ============================================
       // 🤖 AI MATCHING FOR FOUND ITEMS

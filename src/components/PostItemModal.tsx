@@ -3,7 +3,6 @@ import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import { createThriftItem, createLostFoundItem, uploadItemImage, findMatchingLostItems,
   notifyMatchedUsers } from "../lib/supabaseService";
-import { sendNewItemNotification, getAllUserEmails } from '../lib/supabaseService';
 import { supabase } from '../lib/supabase';
 
 interface PostItemModalProps {

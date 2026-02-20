@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
-import { createThriftItem, createLostFoundItem, uploadItemImage } from "../lib/supabaseService";
+import { createThriftItem, createLostFoundItem, uploadItemImage, findMatchingLostItems,
+  notifyMatchedUsers } from "../lib/supabaseService";
+import { sendNewItemNotification, getAllUserEmails } from '../lib/supabaseService';
+import { supabase } from '../lib/supabase';
 
 interface PostItemModalProps {
   isOpen: boolean; // Controls if modal shows or hides
@@ -45,13 +48,14 @@ export function PostItemModal({
       let savedItem;
       let imageUrl: string | undefined = undefined;
 
-      //upload image first if exists
-      if(formData.image){
-        console.log('uploading image');
+      // Upload image first if exists
+      if (formData.image) {
+        console.log('📤 Uploading image...');
         imageUrl = await uploadItemImage(formData.image) || undefined;
         console.log('✅ Image uploaded:', imageUrl);
       }
 
+      // Save item to database
       if (type === "thrift") {
         savedItem = await createThriftItem({
           title: formData.title,
@@ -71,9 +75,49 @@ export function PostItemModal({
           image_url: imageUrl
         });
       }
-      alert("Item posted successfully!");
 
-       // Wait for parent to reload items
+      console.log('✅ Item saved to database:', savedItem);
+
+      // ============================================
+      // 🤖 AI MATCHING FOR FOUND ITEMS
+      // ============================================
+      if (type === 'lost-found' && formData.itemType === 'found') {
+        try {
+          console.log('🤖 Starting AI matching...');
+          
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          const matches = await findMatchingLostItems({
+            title: formData.title,
+            description: formData.description,
+            location: formData.location,
+          });
+          
+          if (matches.length > 0) {
+            console.log(`🎉 Found ${matches.length} potential matches!`);
+            
+            await notifyMatchedUsers(matches, {
+              title: formData.title,
+              description: formData.description,
+              location: formData.location,
+              user_email: user?.email || '',
+            });
+            
+            alert(`Item posted successfully! Found ${matches.length} potential match(es) - users have been notified!`);
+          } else {
+            console.log('🤖 No AI matches found');
+            alert('Item posted successfully! No matching lost items found yet.');
+          }
+        } catch (aiError) {
+          console.error('⚠️ AI matching failed:', aiError);
+          alert('Item posted successfully! (AI matching unavailable)');
+        }
+      } else {
+        // Lost items and thrift items - just post, no emails
+        alert('Item posted successfully!');
+      }
+
+      // Wait for parent to reload items
       if (onItemPosted) {
         await onItemPosted(savedItem);
       }
@@ -93,7 +137,7 @@ export function PostItemModal({
 
       // Close modal LAST (after everything else completes)
       onClose();
-      
+
     } catch (error: any) {
       console.error("Error posting item:", error);
       alert("Failed to post item: " + (error.message || "Unknown error"));

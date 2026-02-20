@@ -9,6 +9,7 @@ import { LostFoundPage } from './pages/LostFoundPage';
 import { ThriftPage } from './pages/ThriftPage';
 import { MyPostsPage } from './pages/MyPostsPage';
 
+
 //impors all the components app needs to assemble application
 interface User {
   email: string;

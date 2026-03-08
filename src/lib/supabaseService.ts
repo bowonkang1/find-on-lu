@@ -343,21 +343,30 @@ View item: ${itemUrl}
   `;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Find On LU <onboarding@resend.dev>',
-      to: to,
-      subject: subject,
-      html: htmlBody,
-      text: textBody,
+    // Call serverless function instead of Resend directly
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: to,
+        subject: subject,
+        html: htmlBody,
+      }),
     });
 
-    if (error) {
-      console.error('Email send error:', error);
-      throw error;
+    // Check if request succeeded
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Email send error:', errorData);
+      throw new Error(errorData.error || 'Failed to send email');
     }
 
+    const data = await response.json();
     console.log('✅ Email sent successfully:', data);
     return data;
+
   } catch (error) {
     console.error('❌ Failed to send email:', error);
     throw error;
@@ -410,6 +419,7 @@ async function getEmbedding(text: string): Promise<number[]> {
     const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
+      encoding_format: "float"
     });
     return response.data[0].embedding;
   } catch (error) {
@@ -480,8 +490,8 @@ export async function findMatchingLostItems(foundItem: {
       const similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
       console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
       
-      // If similarity > 75%, it's a potential match
-      if (similarity > 0.75) {
+      // If similarity > 85%, it's a potential match
+      if (similarity > 0.85) {
         console.log(`   ✅ MATCH FOUND! (${(similarity * 100).toFixed(1)}%)`);
         matches.push({
           item: lostItem,
@@ -495,7 +505,7 @@ export async function findMatchingLostItems(foundItem: {
     
     console.log(`🎉 AI matching complete! Found ${matches.length} potential matches`);
     return matches;
-    
+
   } catch (error) {
     console.error('❌ AI matching error:', error);
     return [];
@@ -513,12 +523,12 @@ export async function notifyMatchedUsers(
   }
 ) {
   console.log(`📧 Notifying ${matches.length} matched users...`);
-  
+
   for (const match of matches) {
     try {
       const matchPercent = Math.round(match.score * 100);
       console.log(`📧 Sending email to ${match.item.user_email} (${matchPercent}% match)`);
-      
+
       await sendNewItemNotification({
         to: [match.item.user_email],
         itemType: 'found',
@@ -537,12 +547,12 @@ Please check the details carefully to verify if this is your item.`,
         posterEmail: foundItem.user_email,
         itemUrl: `${window.location.origin}/lost-found`,
       });
-      
+
       console.log(`✅ Email sent to ${match.item.user_email}`);
     } catch (error) {
       console.error(`❌ Failed to notify ${match.item.user_email}:`, error);
     }
   }
-  
+
   console.log('📧 All notification emails sent!');
 }

@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { Resend } from 'resend';
 import OpenAI from 'openai';
 
 //const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY);

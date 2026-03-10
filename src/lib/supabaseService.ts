@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { Resend } from 'resend';
 import OpenAI from 'openai';
 
-const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY);
+//const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY);
 
 const openai = new OpenAI({
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,
@@ -326,20 +326,6 @@ export async function sendNewItemNotification(params: NewItemEmailParams) {
         </div>
       </body>
     </html>
-  `;
-
-  const textBody = `
-New ${itemType} item posted on Find On LU!
-
-${itemTitle}
-${itemPrice ? `Price: $${itemPrice}` : ''}
-
-${itemDescription}
-
-${itemLocation ? `Location: ${itemLocation}` : ''}
-Posted by: ${posterEmail.split('@')[0]}
-
-View item: ${itemUrl}
   `;
 
   try {

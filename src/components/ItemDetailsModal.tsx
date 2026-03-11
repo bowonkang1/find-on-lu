@@ -149,9 +149,22 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               ? `About your ${item.type} item: ${item.title}`
               : `Interested in: ${item.title}`;
 
-            const body = item.price
-              ? `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`
-              : `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
+            let body = "";
+
+            // prefilled email templates for thrift, lost, and found items
+            if (item.price !== undefined) {
+              // Thrift item
+              body = `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`;
+            } else if (item.type === "lost") {
+              // LOST item - someone found it and wants to return it
+              body = `Hi ${posterName},\n\nI saw your lost item posting for "${item.title}" on Find On LU.\n\nI found something matching your description. Let me know when you're available and we can arrange to return it.\n\nThanks!`;
+            } else if (item.type === "found") {
+              // FOUND item - someone thinks it's theirs
+              body = `Hi ${posterName},\n\nI saw your found item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
+            } else {
+              // Fallback for any other case
+              body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;
+            }
 
             const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${
               item.user_email

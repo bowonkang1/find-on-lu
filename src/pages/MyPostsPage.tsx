@@ -301,217 +301,215 @@ export function MyPostsPage() {
                   >
                     Delete
                   </Button>
-                  {/* Edit Modal */}
-                  {showEditModal && editingItem && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-                        <div className="flex justify-between items-center mb-6">
-                          <h2 className="text-2xl font-bold">Edit Item</h2>
-                          <button
-                            onClick={() => {
-                              setShowEditModal(false);
-                              setEditingItem(null);
-                            }}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <svg
-                              className="w-6 h-6"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-
-                        {/* Simple Edit Form */}
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.currentTarget);
-                            const updates: any = {
-                              title: formData.get("title"),
-                              description: formData.get("description"),
-                            };
-
-                            if ("price" in editingItem) {
-                              // Thrift item
-                              updates.price = parseFloat(
-                                formData.get("price") as string
-                              );
-                              updates.category = formData.get("category");
-                              updates.condition = formData.get("condition");
-                            } else {
-                              // Lost & Found item
-                              updates.location = formData.get("location");
-                              updates.date = formData.get("date");
-                            }
-
-                            handleUpdateItem(updates);
-                          }}
-                          className="space-y-4"
-                        >
-                          {/* Title */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Title
-                            </label>
-                            <input
-                              name="title"
-                              type="text"
-                              defaultValue={editingItem.title}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                              required
-                            />
-                          </div>
-
-                          {/* Description */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              name="description"
-                              defaultValue={editingItem.description}
-                              rows={4}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                              required
-                            />
-                          </div>
-                          {/* Description (image change)*/}
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-blue-800">
-                              💡 <strong>Note:</strong> To change the image,
-                              delete this post and create a new one.
-                            </p>s
-                          </div>
-
-                          {/* Thrift-specific fields */}
-                          {"price" in editingItem && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Price
-                                </label>
-                                <input
-                                  name="price"
-                                  type="number"
-                                  step="0.01"
-                                  defaultValue={editingItem.price}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Category
-                                </label>
-                                <select
-                                  name="category"
-                                  defaultValue={editingItem.category}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                >
-                                  <option value="">Select category</option>
-                                  <option value="Electronics">
-                                    Electronics
-                                  </option>
-                                  <option value="Furniture">Furniture</option>
-                                  <option value="Clothing">Clothing</option>
-                                  <option value="Books">Books</option>
-                                  <option value="Sports">
-                                    Sports & Outdoors
-                                  </option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Condition
-                                </label>
-                                <select
-                                  name="condition"
-                                  defaultValue={editingItem.condition}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                >
-                                  <option value="">Select condition</option>
-                                  <option value="New">New</option>
-                                  <option value="Like New">Like New</option>
-                                  <option value="Good">Good</option>
-                                  <option value="Fair">Fair</option>
-                                  <option value="Poor">Poor</option>
-                                </select>
-                              </div>
-                            </>
-                          )}
-
-                          {/* Lost & Found specific fields */}
-                          {"location" in editingItem && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Location
-                                </label>
-                                <input
-                                  name="location"
-                                  type="text"
-                                  defaultValue={editingItem.location}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Date
-                                </label>
-                                <input
-                                  name="date"
-                                  type="date"
-                                  defaultValue={editingItem.date}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          {/* Buttons */}
-                          <div className="flex gap-3 pt-4">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => {
-                                setShowEditModal(false);
-                                setEditingItem(null);
-                              }}
-                              className="flex-1"
-                            >
-                              Cancel
-                            </Button>
-                            <Button type="submit" className="flex-1">
-                              Save Changes
-                            </Button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editingItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Edit Item</h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Simple Edit Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const updates: any = {
+                  title: formData.get("title"),
+                  description: formData.get("description"),
+                };
+
+                if ("price" in editingItem) {
+                  // Thrift item
+                  updates.price = parseFloat(formData.get("price") as string);
+                  updates.category = formData.get("category");
+                  updates.condition = formData.get("condition");
+                } else {
+                  // Lost & Found item
+                  updates.location = formData.get("location");
+                  updates.date = formData.get("date");
+                }
+
+                handleUpdateItem(updates);
+              }}
+              className="space-y-4"
+            >
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <input
+                  name="title"
+                  type="text"
+                  defaultValue={editingItem.title}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  defaultValue={editingItem.description}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                  required
+                />
+              </div>
+              {/* Description (image change)*/}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Note:</strong> To change the image, delete this
+                  post and create a new one.
+                </p>
+              </div>
+
+              {/* Thrift-specific fields */}
+              {"price" in editingItem && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price
+                    </label>
+                    <input
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      defaultValue={editingItem.price}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <select
+                      name="category"
+                      defaultValue={editingItem.category}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    >
+                      <option value="">Select category</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Furniture">Furniture</option>
+                      <option value="Clothing">Clothing</option>
+                      <option value="Books">Books</option>
+                      <option value="Sports">Sports & Outdoors</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Condition
+                    </label>
+                    <select
+                      name="condition"
+                      defaultValue={editingItem.condition}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    >
+                      <option value="">Select condition</option>
+                      <option value="New">New</option>
+                      <option value="Like New">Like New</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Lost & Found specific fields */}
+              {"location" in editingItem && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location
+                    </label>
+                    <input
+                      name="location"
+                      type="text"
+                      defaultValue={editingItem.location}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
+                    </label>
+                    <input
+                      name="date"
+                      type="date"
+                      defaultValue={editingItem.date}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingItem(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

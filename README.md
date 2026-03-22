@@ -2,7 +2,7 @@
 
 A full-stack campus platform for Lawrence University students to report lost & found items and buy/sell secondhand goods.
 
-🌐 Live Demo: https://find-on-lu-j0xaan8jw-bowonkang1s-projects.vercel.app
+🌐 Live Demo: https://find-on-lu-j0xaan8jw-bowonkang1s-projects.vercel.app<br>
 📽️ Presentation: [View Slides](./slides/find-on-lu-slides.pdf)
 
 ---

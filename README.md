@@ -53,21 +53,28 @@ Find On LU solves both problems in a single platform.
 
 ###  Sign In
 ![signIn](./screenshots/signin-page.png)
+
 ![confirmationEmail](./screenshots/confirmation-email.png)
+
 
 ###  Dashboard
 ![Dashboard](./screenshots/Dashboard.png)
 
-### 🔍 Lost & Found
+### Lost & Found
 ![Lost & Found](./screenshots/LostAndFound.png)
-![Lost & Found item](./screenshots/LostAndFound-item.png)
+
+![Lost & Found item](./screenshots/LostAndFound-itemcard.png)
+
 ![Lost & Found reportitem](./screenshots/LostAndFound-reportitem.png)
 
 ###  Marketplace
 ![Marketplace](./screenshots/thriftstore-dashboard.png)
+
 ![Marketplace-itemcard](./screenshots/thriftstore-itemcard.png)
+
 ![Marketplace-sellitem](./screenshots/thriftstore-sellitem.png)
 
 ###  My Post
 ![Mypost-dashboard](./screenshots/mypost-dashboard.png)
+
 ![Mypost-edititem](./screenshots/mypost-edititem.png)

@@ -1,46 +1,80 @@
-# Getting Started with Create React App
+# Find On LU
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack campus platform for Lawrence University students to report lost & found items and buy/sell secondhand goods.
 
-## Available Scripts
+🌐 Live Demo: https://find-on-lu-j0xaan8jw-bowonkang1s-projects.vercel.app<br>
+📽️ Presentation: [View Slides](./slides/find-on-lu-slides.pdf)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Overview
+Find On LU simplifies how students recover lost items and participate in a campus marketplace.
+It provides a centralized platform for posting lost/found items and trading secondhand goods within the community.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Features
+- Lost & Found reporting with image uploads
+- Campus marketplace (buy/sell items)
+- Email authentication using @lawrence.edu
+- Organized dashboard for managing posts
+- Clean and responsive UI
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Tech Stack
+- Frontend: React, TypeScript, Tailwind CSS
+- Backend: Supabase, PostgreSQL
+- Deployment: Vercel
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Key Highlights
+- Built a full-stack application with authentication and database integration
+- Designed a campus-only access system using email verification
+- Deployed production-ready app with Supabase + Vercel
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Motivation
+On campus, lost items are difficult to recover and there is no unified marketplace.
+Find On LU solves both problems in a single platform.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Future Improvements
+- Real-time chat between users
+- Notifications (email / push)
+- Image recognition for item matching
+- Mobile app version
+- Multi-campus support
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Screenshots
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+###  Sign In
+![signIn](./screenshots/signin-page.png)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+![confirmationEmail](./screenshots/confirmation-email.png)
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+###  Dashboard
+![Dashboard](./screenshots/Dashboard.png)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Lost & Found
+![Lost & Found](./screenshots/LostAndFound.png)
+
+![Lost & Found item](./screenshots/LostAndFound-itemcard.png)
+
+![Lost & Found reportitem](./screenshots/LostAndFound-reportitem.png)
+
+###  Marketplace
+![Marketplace](./screenshots/thriftstore-dashboard.png)
+
+![Marketplace-itemcard](./screenshots/thriftstore-itemcard.png)
+
+![Marketplace-sellitem](./screenshots/thriftstore-sellitem.png)
+
+###  My Post
+![Mypost-dashboard](./screenshots/mypost-dashboard.png)
+
+![Mypost-edititem](./screenshots/mypost-edititem.png)

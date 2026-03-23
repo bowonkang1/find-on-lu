@@ -65,6 +65,8 @@ Find On LU solves both problems in a single platform.
 
 ![Lost & Found item](./screenshots/LostAndFound-itemcard.png)
 
+![Lost & Found contact email](./screenshots/lostandfound-contactemail.png)
+
 ![Lost & Found reportitem](./screenshots/LostAndFound-reportitem.png)
 
 ###  Marketplace

@@ -44,6 +44,9 @@ export function MyPostsPage() {
     ThriftItem | LostFoundItem | null
   >(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [filterType, setFilterType] = useState<
+    "all" | "thrift" | "lost" | "found"
+  >("all");
 
   useEffect(() => {
     loadMyPosts();
@@ -149,6 +152,21 @@ export function MyPostsPage() {
   }
 
   const totalPosts = thriftItems.length + lostFoundItems.length;
+  // Count how many lost and found items we have
+  const lostCount = lostFoundItems.filter((i) => i.type === "lost").length;
+  const foundCount = lostFoundItems.filter((i) => i.type === "found").length;
+
+  // Filter items based on which button is clicked
+  const filteredThriftItems =
+    filterType === "all" || filterType === "thrift" ? thriftItems : [];
+
+  const filteredLostFoundItems = lostFoundItems.filter(
+    (item) => filterType === "all" || item.type === filterType
+  );
+
+  // Check if we have anything to show
+  const hasItemsToShow =
+    filteredThriftItems.length > 0 || filteredLostFoundItems.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -159,19 +177,62 @@ export function MyPostsPage() {
         </p>
       </div>
 
-      {/* Thrift Store Items */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+      {/* Filter Buttons */}
+      <div className="flex gap-2 mb-8 flex-wrap">
+        <Button
+          variant={filterType === "all" ? "primary" : "outline"}
+          onClick={() => setFilterType("all")}
+          size="sm"
+        >
+          All Posts ({totalPosts})
+        </Button>
+        <Button
+          variant={filterType === "thrift" ? "primary" : "outline"}
+          onClick={() => setFilterType("thrift")}
+          size="sm"
+        >
           Thrift Store ({thriftItems.length})
-        </h2>
+        </Button>
+        <Button
+          variant={filterType === "lost" ? "primary" : "outline"}
+          onClick={() => setFilterType("lost")}
+          size="sm"
+        >
+          Lost ({lostCount})
+        </Button>
+        <Button
+          variant={filterType === "found" ? "primary" : "outline"}
+          onClick={() => setFilterType("found")}
+          size="sm"
+        >
+          Found ({foundCount})
+        </Button>
+      </div>
 
-        {thriftItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No thrift items posted yet</p>
-          </div>
-        ) : (
+      {/* Empty State */}
+      {!hasItemsToShow && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">📭</div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            No items found
+          </h3>
+          <p className="text-gray-500">
+            {filterType === "all"
+              ? "You haven't posted anything yet"
+              : `No ${filterType} items posted yet`}
+          </p>
+        </div>
+      )}
+
+      {/* Thrift Store Items */}
+      {filteredThriftItems.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Thrift Store ({filteredThriftItems.length})
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {thriftItems.map((item) => (
+            {filteredThriftItems.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                   {item.image_url ? (
@@ -226,22 +287,18 @@ export function MyPostsPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Lost & Found Items */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Lost & Found ({lostFoundItems.length})
-        </h2>
+      {filteredLostFoundItems.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Lost & Found ({filteredLostFoundItems.length})
+          </h2>
 
-        {lostFoundItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No lost/found items posted yet</p>
-          </div>
-        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lostFoundItems.map((item) => (
+            {filteredLostFoundItems.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                   {item.image_url ? (
@@ -301,217 +358,215 @@ export function MyPostsPage() {
                   >
                     Delete
                   </Button>
-                  {/* Edit Modal */}
-                  {showEditModal && editingItem && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-                        <div className="flex justify-between items-center mb-6">
-                          <h2 className="text-2xl font-bold">Edit Item</h2>
-                          <button
-                            onClick={() => {
-                              setShowEditModal(false);
-                              setEditingItem(null);
-                            }}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <svg
-                              className="w-6 h-6"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-
-                        {/* Simple Edit Form */}
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.currentTarget);
-                            const updates: any = {
-                              title: formData.get("title"),
-                              description: formData.get("description"),
-                            };
-
-                            if ("price" in editingItem) {
-                              // Thrift item
-                              updates.price = parseFloat(
-                                formData.get("price") as string
-                              );
-                              updates.category = formData.get("category");
-                              updates.condition = formData.get("condition");
-                            } else {
-                              // Lost & Found item
-                              updates.location = formData.get("location");
-                              updates.date = formData.get("date");
-                            }
-
-                            handleUpdateItem(updates);
-                          }}
-                          className="space-y-4"
-                        >
-                          {/* Title */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Title
-                            </label>
-                            <input
-                              name="title"
-                              type="text"
-                              defaultValue={editingItem.title}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                              required
-                            />
-                          </div>
-
-                          {/* Description */}
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Description
-                            </label>
-                            <textarea
-                              name="description"
-                              defaultValue={editingItem.description}
-                              rows={4}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                              required
-                            />
-                          </div>
-                          {/* Description (image change)*/}
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-blue-800">
-                              💡 <strong>Note:</strong> To change the image,
-                              delete this post and create a new one.
-                            </p>
-                          </div>
-
-                          {/* Thrift-specific fields */}
-                          {"price" in editingItem && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Price
-                                </label>
-                                <input
-                                  name="price"
-                                  type="number"
-                                  step="0.01"
-                                  defaultValue={editingItem.price}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Category
-                                </label>
-                                <select
-                                  name="category"
-                                  defaultValue={editingItem.category}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                >
-                                  <option value="">Select category</option>
-                                  <option value="Electronics">
-                                    Electronics
-                                  </option>
-                                  <option value="Furniture">Furniture</option>
-                                  <option value="Clothing">Clothing</option>
-                                  <option value="Books">Books</option>
-                                  <option value="Sports">
-                                    Sports & Outdoors
-                                  </option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Condition
-                                </label>
-                                <select
-                                  name="condition"
-                                  defaultValue={editingItem.condition}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                >
-                                  <option value="">Select condition</option>
-                                  <option value="New">New</option>
-                                  <option value="Like New">Like New</option>
-                                  <option value="Good">Good</option>
-                                  <option value="Fair">Fair</option>
-                                  <option value="Poor">Poor</option>
-                                </select>
-                              </div>
-                            </>
-                          )}
-
-                          {/* Lost & Found specific fields */}
-                          {"location" in editingItem && (
-                            <>
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Location
-                                </label>
-                                <input
-                                  name="location"
-                                  type="text"
-                                  defaultValue={editingItem.location}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  Date
-                                </label>
-                                <input
-                                  name="date"
-                                  type="date"
-                                  defaultValue={editingItem.date}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
-                                  required
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          {/* Buttons */}
-                          <div className="flex gap-3 pt-4">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => {
-                                setShowEditModal(false);
-                                setEditingItem(null);
-                              }}
-                              className="flex-1"
-                            >
-                              Cancel
-                            </Button>
-                            <Button type="submit" className="flex-1">
-                              Save Changes
-                            </Button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && editingItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Edit Item</h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingItem(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Simple Edit Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const updates: any = {
+                  title: formData.get("title"),
+                  description: formData.get("description"),
+                };
+
+                if ("price" in editingItem) {
+                  // Thrift item
+                  updates.price = parseFloat(formData.get("price") as string);
+                  updates.category = formData.get("category");
+                  updates.condition = formData.get("condition");
+                } else {
+                  // Lost & Found item
+                  updates.location = formData.get("location");
+                  updates.date = formData.get("date");
+                }
+
+                handleUpdateItem(updates);
+              }}
+              className="space-y-4"
+            >
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <input
+                  name="title"
+                  type="text"
+                  defaultValue={editingItem.title}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  defaultValue={editingItem.description}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                  required
+                />
+              </div>
+              {/* Description (image change)*/}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Note:</strong> To change the image, delete this
+                  post and create a new one.
+                </p>
+              </div>
+
+              {/* Thrift-specific fields */}
+              {"price" in editingItem && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Price
+                    </label>
+                    <input
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      defaultValue={editingItem.price}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Category
+                    </label>
+                    <select
+                      name="category"
+                      defaultValue={editingItem.category}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    >
+                      <option value="">Select category</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Furniture">Furniture</option>
+                      <option value="Clothing">Clothing</option>
+                      <option value="Books">Books</option>
+                      <option value="Sports">Sports & Outdoors</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Condition
+                    </label>
+                    <select
+                      name="condition"
+                      defaultValue={editingItem.condition}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    >
+                      <option value="">Select condition</option>
+                      <option value="New">New</option>
+                      <option value="Like New">Like New</option>
+                      <option value="Good">Good</option>
+                      <option value="Fair">Fair</option>
+                      <option value="Poor">Poor</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Lost & Found specific fields */}
+              {"location" in editingItem && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Location
+                    </label>
+                    <input
+                      name="location"
+                      type="text"
+                      defaultValue={editingItem.location}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
+                    </label>
+                    <input
+                      name="date"
+                      type="date"
+                      defaultValue={editingItem.date}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingItem(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

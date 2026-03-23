@@ -5,6 +5,7 @@ module.exports = {
   ],
   theme: {
     extend: {
+      
       colors: {
         'lu-blue': {
           500: '#3b82f6',

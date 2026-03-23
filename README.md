@@ -74,6 +74,8 @@ Find On LU solves both problems in a single platform.
 
 ![Marketplace-itemcard](./screenshots/thriftstore-itemcard.png)
 
+![Marketplace-contact email](./screenshots/thriftstore-contactemail.png)
+
 ![Marketplace-sellitem](./screenshots/thriftstore-sellitem.png)
 
 ###  My Post

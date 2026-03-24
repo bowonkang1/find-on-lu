@@ -44,6 +44,9 @@ export function MyPostsPage() {
     ThriftItem | LostFoundItem | null
   >(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [filterType, setFilterType] = useState<
+    "all" | "thrift" | "lost" | "found"
+  >("all");
 
   useEffect(() => {
     loadMyPosts();
@@ -149,6 +152,21 @@ export function MyPostsPage() {
   }
 
   const totalPosts = thriftItems.length + lostFoundItems.length;
+  // Count how many lost and found items we have
+  const lostCount = lostFoundItems.filter((i) => i.type === "lost").length;
+  const foundCount = lostFoundItems.filter((i) => i.type === "found").length;
+
+  // Filter items based on which button is clicked
+  const filteredThriftItems =
+    filterType === "all" || filterType === "thrift" ? thriftItems : [];
+
+  const filteredLostFoundItems = lostFoundItems.filter(
+    (item) => filterType === "all" || item.type === filterType
+  );
+
+  // Check if we have anything to show
+  const hasItemsToShow =
+    filteredThriftItems.length > 0 || filteredLostFoundItems.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -159,19 +177,62 @@ export function MyPostsPage() {
         </p>
       </div>
 
-      {/* Thrift Store Items */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+      {/* Filter Buttons */}
+      <div className="flex gap-2 mb-8 flex-wrap">
+        <Button
+          variant={filterType === "all" ? "primary" : "outline"}
+          onClick={() => setFilterType("all")}
+          size="sm"
+        >
+          All Posts ({totalPosts})
+        </Button>
+        <Button
+          variant={filterType === "thrift" ? "primary" : "outline"}
+          onClick={() => setFilterType("thrift")}
+          size="sm"
+        >
           Thrift Store ({thriftItems.length})
-        </h2>
+        </Button>
+        <Button
+          variant={filterType === "lost" ? "primary" : "outline"}
+          onClick={() => setFilterType("lost")}
+          size="sm"
+        >
+          Lost ({lostCount})
+        </Button>
+        <Button
+          variant={filterType === "found" ? "primary" : "outline"}
+          onClick={() => setFilterType("found")}
+          size="sm"
+        >
+          Found ({foundCount})
+        </Button>
+      </div>
 
-        {thriftItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No thrift items posted yet</p>
-          </div>
-        ) : (
+      {/* Empty State */}
+      {!hasItemsToShow && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">📭</div>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            No items found
+          </h3>
+          <p className="text-gray-500">
+            {filterType === "all"
+              ? "You haven't posted anything yet"
+              : `No ${filterType} items posted yet`}
+          </p>
+        </div>
+      )}
+
+      {/* Thrift Store Items */}
+      {filteredThriftItems.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Thrift Store ({filteredThriftItems.length})
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {thriftItems.map((item) => (
+            {filteredThriftItems.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                   {item.image_url ? (
@@ -226,22 +287,18 @@ export function MyPostsPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Lost & Found Items */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Lost & Found ({lostFoundItems.length})
-        </h2>
+      {filteredLostFoundItems.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Lost & Found ({filteredLostFoundItems.length})
+          </h2>
 
-        {lostFoundItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No lost/found items posted yet</p>
-          </div>
-        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lostFoundItems.map((item) => (
+            {filteredLostFoundItems.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                   {item.image_url ? (
@@ -305,8 +362,8 @@ export function MyPostsPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {showEditModal && editingItem && (

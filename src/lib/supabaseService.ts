@@ -413,6 +413,39 @@ async function getEmbedding(text: string): Promise<number[]> {
   }
 }
 
+//Analyze image and extract visual features
+async function analyzeImage(imageUrl: string): Promise<string> {
+  try {
+    console.log('🖼️ Analyzing image:', imageUrl);
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{
+        role: "user",
+        content: [
+          { 
+            type: "text", 
+            text: "Describe this lost/found item in detail. Include: color, brand/type, size, condition, any distinctive features like stickers, scratches, wear patterns, or unique markings. Be specific and factual." 
+          },
+          { 
+            type: "image_url", 
+            image_url: { url: imageUrl }
+          }
+        ]
+      }],
+      max_tokens: 200
+    });
+
+    const aiDescription = response.choices[0].message.content || '';
+    console.log('✅ AI image analysis:', aiDescription);
+    return aiDescription;
+
+  } catch (error) {
+    console.error('❌ Image analysis failed:', error);
+    return '';
+  }
+}
+
 // Calculate similarity between two vectors (0 = different, 1 = identical)
 function cosineSimilarity(a: number[], b: number[]): number {
   const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
@@ -426,12 +459,24 @@ export async function findMatchingLostItems(foundItem: {
   title: string;
   description: string;
   location?: string;
+  image_url?: string; 
 }): Promise<any[]> {
   try {
     console.log('🤖 AI: Starting matching for found item...');
     
-    // Create text representation of found item
-    const foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ''}`;
+    // Create text representation
+    let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ''}`;
+    
+    //  If image exists, analyze it and add to text
+    if (foundItem.image_url) {
+      console.log('🖼️ Found item has image, analyzing...');
+      const imageAnalysis = await analyzeImage(foundItem.image_url);
+      if (imageAnalysis) {
+        foundText = `${foundText} ${imageAnalysis}`;
+        console.log('✅ Enhanced description with image analysis');
+      }
+    }
+    
     console.log('🤖 Found item text:', foundText);
     
     // Get embedding for found item
@@ -466,7 +511,17 @@ export async function findMatchingLostItems(foundItem: {
       console.log(`🤖 Checking lost item ${i + 1}/${lostItems.length}: "${lostItem.title}"`);
       
       // Create text for lost item
-      const lostText = `${lostItem.title} ${lostItem.description} ${lostItem.location || ''}`;
+      let lostText = `${lostItem.title} ${lostItem.description} ${lostItem.location || ''}`;
+      
+      // If lost item has image, analyze it too
+      if (lostItem.image_url) {
+        console.log('   🖼️ Lost item has image, analyzing...');
+        const imageAnalysis = await analyzeImage(lostItem.image_url);
+        if (imageAnalysis) {
+          lostText = `${lostText} ${imageAnalysis}`;
+          console.log('   ✅ Enhanced lost item with image analysis');
+        }
+      }
       
       // Get embedding for lost item
       const lostEmbedding = await getEmbedding(lostText);
@@ -475,12 +530,21 @@ export async function findMatchingLostItems(foundItem: {
       const similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
       console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
       
-      // If similarity > 85%, it's a potential match
-      if (similarity > 0.85) {
+      // If similarity > 70%, it's a potential match
+      if (similarity > 0.70) {
+        //Determine confidence level
+        let confidence = 'Good';
+        if (similarity > 0.85){
+          confidence = 'Very High';
+        } else if (similarity > 0.80) {
+          confidence = 'High';
+        }
         console.log(`   ✅ MATCH FOUND! (${(similarity * 100).toFixed(1)}%)`);
+
         matches.push({
           item: lostItem,
           score: similarity,
+          confidence: confidence,
         });
       }
     }
@@ -505,6 +569,7 @@ export async function notifyMatchedUsers(
     description: string;
     location?: string;
     user_email: string;
+    image_url?: string;
   }
 ) {
   console.log(`📧 Notifying ${matches.length} matched users...`);
@@ -512,22 +577,43 @@ export async function notifyMatchedUsers(
   for (const match of matches) {
     try {
       const matchPercent = Math.round(match.score * 100);
-      console.log(`📧 Sending email to ${match.item.user_email} (${matchPercent}% match)`);
+      const confidence = match.confidence || 'Good';  //  Get confidence from match
+      
+      console.log(`📧 Sending email to ${match.item.user_email} (${matchPercent}% match - ${confidence} confidence)`);
+
+      //  Create custom subject based on confidence
+      let subject = '';
+      if (confidence === 'Very High') {
+        subject = `🎯 Very High Match (${matchPercent}%): Your lost item likely found!`;
+      } else if (confidence === 'High') {
+        subject = `✅ High Match (${matchPercent}%): Possible match for your lost item`;
+      } else {
+        subject = `🔍 Good Match (${matchPercent}%): Check if this matches your item`;
+      }
+
+      //  Create custom description with confidence messaging
+      let description = `Someone found an item that matches your lost "${match.item.title}"!\n\n`;
+      description += `Match Confidence: ${confidence} (${matchPercent}%)\n\n`;
+
+      if (confidence === 'Very High') {
+        description += `This is a very strong match! `;
+      } else if (confidence === 'High') {
+        description += `This looks like a good match. `;
+      } else {
+        description += `This might be your item - please verify the details carefully. `;
+      }
+
+      description += `\n\nFound Item Details:\n`;
+      description += `- Title: ${foundItem.title}\n`;
+      description += `- Description: ${foundItem.description}\n`;
+      description += `- Location: ${foundItem.location || 'Not specified'}\n\n`;
+      description += `Please check the details carefully to confirm if this is your item.`;
 
       await sendNewItemNotification({
         to: [match.item.user_email],
         itemType: 'found',
-        itemTitle: `🎉 Possible Match Found!`,
-        itemDescription: `Someone found an item that might match your lost "${match.item.title}"!
-
-Match confidence: ${matchPercent}%
-
-Found item details:
-- Title: ${foundItem.title}
-- Description: ${foundItem.description}
-- Location: ${foundItem.location || 'Not specified'}
-
-Please check the details carefully to verify if this is your item.`,
+        itemTitle: subject,  //  Use confidence-based subject
+        itemDescription: description,  // Use confidence-based description
         itemLocation: foundItem.location,
         posterEmail: foundItem.user_email,
         itemUrl: `${window.location.origin}/lost-found`,

@@ -97,6 +97,7 @@ export function PostItemModal({
             title: formData.title,
             description: formData.description,
             location: formData.location,
+            image_url: imageUrl,
           });
           
           if (matches.length > 0) {
@@ -107,6 +108,7 @@ export function PostItemModal({
               description: formData.description,
               location: formData.location,
               user_email: user?.email || '',
+              image_url: imageUrl,
             });
             
             alert(`Item posted successfully! Found ${matches.length} potential match(es) - users have been notified!`);

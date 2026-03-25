@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
-import { createThriftItem, createLostFoundItem, uploadItemImage, findMatchingLostItems,
-  notifyMatchedUsers } from "../lib/supabaseService";
-import { supabase } from '../lib/supabase';
+import {
+  createThriftItem,
+  createLostFoundItem,
+  uploadItemImage,
+} from "../lib/supabaseService";
+import { supabase } from "../lib/supabase";
 
 interface PostItemModalProps {
   isOpen: boolean; // Controls if modal shows or hides
@@ -49,9 +52,9 @@ export function PostItemModal({
 
       // Upload image first if exists
       if (formData.image) {
-        console.log('📤 Uploading image...');
-        imageUrl = await uploadItemImage(formData.image) || undefined;
-        console.log('✅ Image uploaded:', imageUrl);
+        console.log("📤 Uploading image...");
+        imageUrl = (await uploadItemImage(formData.image)) || undefined;
+        console.log("✅ Image uploaded:", imageUrl);
       }
 
       // Save item to database
@@ -62,7 +65,7 @@ export function PostItemModal({
           price: parseFloat(formData.price),
           category: formData.category || "Other",
           condition: formData.condition,
-          image_url: imageUrl
+          image_url: imageUrl,
         });
       } else {
         savedItem = await createLostFoundItem({
@@ -71,58 +74,67 @@ export function PostItemModal({
           type: formData.itemType as "lost" | "found",
           location: formData.location,
           date: new Date().toISOString().split("T")[0],
-          image_url: imageUrl
+          image_url: imageUrl,
         });
       }
 
-      console.log('✅ Item saved to database:', savedItem);
-      console.log('🔑 OpenAI key exists?', !!process.env.REACT_APP_OPENAI_API_KEY);
-      alert('CHECKPOINT 1: Item saved');
-      console.log('🔍 CHECKPOINT 1: Item saved');
-      console.log('🔍 type:', type);
-      console.log('🔍 formData.itemType:', formData.itemType);
+      console.log("✅ Item saved to database:", savedItem);
+      console.log(
+        "🔑 OpenAI key exists?",
+        !!process.env.REACT_APP_OPENAI_API_KEY
+      );
+      alert("CHECKPOINT 1: Item saved");
+      console.log("🔍 CHECKPOINT 1: Item saved");
+      console.log("🔍 type:", type);
+      console.log("🔍 formData.itemType:", formData.itemType);
 
       // ============================================
-      // 🤖 AI MATCHING FOR FOUND ITEMS
+      // 🤖 AI MATCHING FOR FOUND ITEMS (Background Job)
       // ============================================
-      if (type === 'lost-found' && formData.itemType === 'found') {
-        alert('CHECKPOINT 2: Inside AI block!');  // ADD THIS
-        console.log('🔍 CHECKPOINT 2: Inside AI block!');
+      if (type === "lost-found" && formData.itemType === "found") {
+        console.log("🔍 Triggering background AI matching...");
+
         try {
-          console.log('🤖 Starting AI matching...');
-          
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          const matches = await findMatchingLostItems({
-            title: formData.title,
-            description: formData.description,
-            location: formData.location,
-            image_url: imageUrl,
-          });
-          
-          if (matches.length > 0) {
-            console.log(`🎉 Found ${matches.length} potential matches!`);
-            
-            await notifyMatchedUsers(matches, {
-              title: formData.title,
-              description: formData.description,
-              location: formData.location,
-              user_email: user?.email || '',
-              image_url: imageUrl,
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          // ✅ Trigger background job (don't wait for it)
+          fetch("/api/match-items", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              foundItem: {
+                title: formData.title,
+                description: formData.description,
+                location: formData.location,
+                user_email: user?.email || "",
+                image_url: imageUrl,
+              },
+            }),
+          })
+            .then((response) => {
+              if (response.ok) {
+                console.log("✅ Background matching job started");
+              } else {
+                console.error("❌ Failed to start matching job");
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error triggering background job:", error);
             });
-            
-            alert(`Item posted successfully! Found ${matches.length} potential match(es) - users have been notified!`);
-          } else {
-            console.log('🤖 No AI matches found');
-            alert('Item posted successfully! No matching lost items found yet.');
-          }
-        } catch (aiError) {
-          console.error('⚠️ AI matching failed:', aiError);
-          alert('Item posted successfully! (AI matching unavailable)');
+
+          // ✅ User sees instant success - emails sent in background
+          alert("Item posted successfully! AI is checking for matches...");
+        } catch (error) {
+          console.error("⚠️ Failed to trigger background job:", error);
+          alert("Item posted successfully!");
         }
       } else {
         // Lost items and thrift items - just post, no emails
-        alert('Item posted successfully!');
+        alert("Item posted successfully!");
       }
 
       // Wait for parent to reload items
@@ -145,7 +157,6 @@ export function PostItemModal({
 
       // Close modal LAST (after everything else completes)
       onClose();
-
     } catch (error: any) {
       console.error("Error posting item:", error);
       alert("Failed to post item: " + (error.message || "Unknown error"));

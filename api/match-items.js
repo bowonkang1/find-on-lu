@@ -3,12 +3,12 @@ import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 
 const openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
 
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_ANON_KEY
+  process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_ANON_KEY
 );
 31
 // ==================== AI FUNCTIONS ====================
@@ -204,7 +204,7 @@ async function notifyMatchedUsers(matches, foundItem) {
       description += `Please check the details carefully to confirm if this is your item.`;
 
       // Call the email API
-      await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/send-email`, {
+      await fetch(`https://${process.env.VERCEL_URL || 'http://localhost:3000'}/api/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

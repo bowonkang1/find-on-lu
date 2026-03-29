@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 const supabase = createClient(
   process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_ANON_KEY
+  process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 31
 // ==================== AI FUNCTIONS ====================
@@ -204,7 +204,11 @@ async function notifyMatchedUsers(matches, foundItem) {
       description += `Please check the details carefully to confirm if this is your item.`;
 
       // Call the email API
-      await fetch(`https://${process.env.VERCEL_URL || 'http://localhost:3000'}/api/send-email`, {
+      const emailUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}/api/send-email`
+        : 'http://localhost:3000/api/send-email';
+
+      await fetch(emailUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

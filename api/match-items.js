@@ -1,6 +1,7 @@
 // Import OpenAI and Supabase at the top
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
@@ -10,6 +11,9 @@ const supabase = createClient(
   process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 31;
 // ==================== AI FUNCTIONS ====================
 
@@ -214,32 +218,20 @@ async function notifyMatchedUsers(matches, foundItem) {
       description += `- Location: ${foundItem.location || "Not specified"}\n\n`;
       description += `Please check the details carefully to confirm if this is your item.`;
 
-      // Call the email API
-      const emailUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}/api/send-email`
-        : "http://localhost:3000/api/send-email";
+      // Send email directly via Resend
+      console.log("📧 Sending email to:", match.item.user_email);
 
-      console.log("📧 Calling:", emailUrl);
-      console.log("📧 Sending to:", match.item.user_email);
-
-      const emailResponse = await fetch(emailUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: [match.item.user_email],
-          subject: subject,
-          html: `<p>${description.replace(/\n/g, "<br>")}</p>`,
-        }),
+      const { data, error } = await resend.emails.send({
+        from: "Find On LU <onboarding@resend.dev>",
+        to: [match.item.user_email],
+        subject: subject,
+        html: `<p>${description.replace(/\n/g, "<br>")}</p>`,
       });
 
-      console.log("📧 Status:", emailResponse.status);
-
-      if (emailResponse.ok) {
-        const result = await emailResponse.json();
-        console.log("✅ Email sent successfully:", result);
+      if (error) {
+        console.error("❌ Resend error:", error);
       } else {
-        const error = await emailResponse.text();
-        console.error("❌ Email failed:", error);
+        console.log("✅ Email sent successfully:", data);
       }
     } catch (error) {
       console.error(`❌ Failed to notify ${match.item.user_email}:`, error);

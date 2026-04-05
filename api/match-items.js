@@ -221,11 +221,52 @@ async function notifyMatchedUsers(matches, foundItem) {
       // Send email directly via Resend
       console.log("📧 Sending email to:", match.item.user_email);
 
+      //  App URL
+      const appUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}/lost-found`
+        : "http://localhost:3000/lost-found";
+
+      // HTML 이메일 본문
+      const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #003f87; margin-bottom: 20px;">🎯 Item Match Found!</h2>
+  
+      <p style="line-height: 1.6; color: #333;">
+    ${description.replace(/\n/g, "<br>")}
+     </p>
+  
+  <div style="margin: 30px 0; text-align: center;">
+    <a href="${appUrl}" 
+       style="background-color: #003f87; 
+              color: white; 
+              padding: 14px 32px; 
+              text-decoration: none; 
+              border-radius: 6px; 
+              display: inline-block;
+              font-weight: bold;
+              font-size: 16px;">
+      View on Find On LU
+    </a>
+  </div>
+  
+  <p style="color: #666; font-size: 14px; text-align: center; margin-top: 30px;">
+    Or visit: <a href="${appUrl}" style="color: #003f87;">${appUrl}</a>
+  </p>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+  
+  <p style="color: #999; font-size: 12px; text-align: center;">
+    This is an automated message from Find On LU<br>
+    Lawrence University Lost & Found Platform
+  </p>
+</div>
+`;
+
       const { data, error } = await resend.emails.send({
         from: "Find On LU <onboarding@resend.dev>",
         to: [match.item.user_email],
         subject: subject,
-        html: `<p>${description.replace(/\n/g, "<br>")}</p>`,
+        html: htmlBody, // ✅ 변경됨
       });
 
       if (error) {

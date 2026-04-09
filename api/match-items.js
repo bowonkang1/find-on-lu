@@ -15,6 +15,40 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 31;
+
+// ==================== HELPER FUNCTIONS ====================
+
+function extractColor(text) {
+  const colors = [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "black",
+    "white",
+    "silver",
+    "gold",
+    "pink",
+    "purple",
+    "orange",
+    "brown",
+    "gray",
+    "grey",
+    "navy",
+    "maroon",
+    "teal",
+    "beige",
+  ];
+  const lowerText = text.toLowerCase();
+
+  for (const color of colors) {
+    if (lowerText.includes(color)) {
+      return color;
+    }
+  }
+  return null;
+}
+
 // ==================== AI FUNCTIONS ====================
 
 async function getEmbedding(text) {
@@ -33,7 +67,7 @@ async function getEmbedding(text) {
 
 async function analyzeImage(imageUrl) {
   try {
-    console.log("🖼️ Analyzing image:", imageUrl);
+    console.log(" Analyzing image:", imageUrl);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -43,7 +77,7 @@ async function analyzeImage(imageUrl) {
           content: [
             {
               type: "text",
-              text: "Describe this lost/found item in detail. Include: color, brand/type, size, condition, any distinctive features like stickers, scratches, wear patterns, or unique markings. Be specific and factual.",
+              text: "Describe this lost/found item in detail. MOST IMPORTANT: Start with the PRIMARY COLOR (this is critical for matching). Then include: brand/type, size, secondary colors, condition, and any distinctive features like stickers, scratches, wear patterns, or unique markings. Be very specific about colors.",
             },
             {
               type: "image_url",
@@ -73,7 +107,7 @@ function cosineSimilarity(a, b) {
 
 async function findMatchingLostItems(foundItem) {
   try {
-    console.log("🤖 AI: Starting matching for found item...");
+    console.log(" AI: Starting matching for found item...");
 
     // Create text representation
     let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
@@ -115,7 +149,7 @@ async function findMatchingLostItems(foundItem) {
 
     console.log(`🤖 Comparing against ${lostItems.length} lost items...`);
 
-    // ✅ Analyze ALL images in parallel
+    //  Analyze ALL images in parallel
     console.log("🖼️ Analyzing all images in parallel...");
     const lostItemsWithAnalysis = await Promise.all(
       lostItems.map(async (lostItem) => {
@@ -138,10 +172,19 @@ async function findMatchingLostItems(foundItem) {
       })
     );
 
-    console.log("✅ All images analyzed!");
+    console.log(" All images analyzed!");
 
     // Calculate similarities
     const matches = [];
+
+    // Extract found item color
+    const foundColor = extractColor(
+      `${foundItem.title} ${foundItem.description}`
+    );
+    if (foundColor) {
+      console.log(`🎨 Found item color detected: ${foundColor}`);
+    }
+
     for (let i = 0; i < lostItemsWithAnalysis.length; i++) {
       const lostItem = lostItemsWithAnalysis[i];
       console.log(
@@ -149,7 +192,19 @@ async function findMatchingLostItems(foundItem) {
       );
 
       const lostEmbedding = await getEmbedding(lostItem.enhancedText);
-      const similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
+      let similarity = cosineSimilarity(foundEmbedding, lostEmbedding); // ← let으로 변경!
+
+      // 색상 페널티 추가
+      const lostColor = extractColor(
+        `${lostItem.title} ${lostItem.description}`
+      );
+      if (foundColor && lostColor && foundColor !== lostColor) {
+        console.log(
+          `    Color mismatch: ${foundColor} vs ${lostColor} - applying 50% penalty`
+        );
+        similarity = similarity * 0.5; // 50% 감소
+      }
+
       console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
 
       if (similarity > 0.7) {
@@ -158,7 +213,7 @@ async function findMatchingLostItems(foundItem) {
         else if (similarity > 0.8) confidence = "High";
 
         console.log(
-          `   ✅ MATCH FOUND! (${(similarity * 100).toFixed(1)}%) - ${confidence} confidence`
+          `    MATCH FOUND! (${(similarity * 100).toFixed(1)}%) - ${confidence} confidence`
         );
 
         matches.push({

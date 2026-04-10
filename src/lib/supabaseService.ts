@@ -627,3 +627,20 @@ export async function notifyMatchedUsers(
 
   console.log('📧 All notification emails sent!');
 }
+
+// Update item status
+export async function updateItemStatus(itemId: string, status: 'active' | 'reunited') {
+  const { data, error } = await supabase
+    .from('lost_found_items')
+    .update({ status })
+    .eq('id', itemId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating status:', error);
+    throw error;
+  }
+
+  return data;
+}

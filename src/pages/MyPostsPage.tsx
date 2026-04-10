@@ -45,6 +45,9 @@ export function MyPostsPage() {
     ThriftItem | LostFoundItem | null
   >(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [lostFoundFilter, setLostFoundFilter] = useState<
+    "all" | "lost" | "found"
+  >("all");
 
   useEffect(() => {
     loadMyPosts();
@@ -180,6 +183,11 @@ export function MyPostsPage() {
 
   const totalPosts = thriftItems.length + lostFoundItems.length;
 
+  const filteredLostFoundItems = lostFoundItems.filter((item) => {
+    if (lostFoundFilter === "all") return true;
+    return item.type === lostFoundFilter;
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
@@ -262,17 +270,57 @@ export function MyPostsPage() {
 
       {/* Lost & Found Items */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Lost & Found ({lostFoundItems.length})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Lost & Found ({lostFoundItems.length})
+          </h2>
 
-        {lostFoundItems.length === 0 ? (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={lostFoundFilter === "all" ? "primary" : "outline"}
+              onClick={() => setLostFoundFilter("all")}
+            >
+              All ({lostFoundItems.length})
+            </Button>
+            <Button
+              size="sm"
+              variant={lostFoundFilter === "lost" ? "primary" : "outline"}
+              onClick={() => setLostFoundFilter("lost")}
+              className={
+                lostFoundFilter === "lost"
+                  ? "bg-red-600 hover:bg-red-700 text-white"
+                  : ""
+              }
+            >
+              Lost ({lostFoundItems.filter((i) => i.type === "lost").length})
+            </Button>
+            <Button
+              size="sm"
+              variant={lostFoundFilter === "found" ? "primary" : "outline"}
+              onClick={() => setLostFoundFilter("found")}
+              className={
+                lostFoundFilter === "found"
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : ""
+              }
+            >
+              Found ({lostFoundItems.filter((i) => i.type === "found").length})
+            </Button>
+          </div>
+        </div>
+
+        {filteredLostFoundItems.length === 0 ? (
           <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No lost/found items posted yet</p>
+            <p className="text-gray-500">
+              {lostFoundFilter === "all" // 
+                ? "No lost/found items posted yet"
+                : `No ${lostFoundFilter} items posted yet`}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lostFoundItems.map((item) => (
+            {filteredLostFoundItems.map((item) => (
               <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
                   {item.image_url ? (
@@ -313,7 +361,7 @@ export function MyPostsPage() {
                   Posted {new Date(item.created_at).toLocaleDateString()}
                 </div>
 
-                {/* ✅ Status Badge */}
+                {/*  Status Badge */}
                 <div className="mb-3">
                   {item.status === "reunited" ? (
                     <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -326,7 +374,7 @@ export function MyPostsPage() {
                   )}
                 </div>
 
-                {/* ✅ Buttons with Status toggle */}
+                {/*  Buttons with Status toggle */}
                 <div className="flex flex-col gap-2">
                   {/* Status toggle button */}
                   {item.status === "active" ? (

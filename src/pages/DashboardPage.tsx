@@ -44,10 +44,11 @@ export function DashboardPage() {
         .select("*", { count: "exact", head: true })
         .eq("status", "active");
 
-      // Count reunited items (all time)
+      // Count reunited items (all time) - Lost items only
       const { count: reunitedCount } = await supabase
         .from("lost_found_items")
         .select("*", { count: "exact", head: true })
+        .eq("type", "lost")
         .eq("status", "reunited");
 
       setStats({

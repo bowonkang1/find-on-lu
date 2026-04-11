@@ -48,6 +48,9 @@ export function MyPostsPage() {
   const [lostFoundFilter, setLostFoundFilter] = useState<
     "all" | "lost" | "found"
   >("all");
+  const [sectionFilter, setSectionFilter] = useState<
+    "all" | "thrift" | "lostfound"
+  >("all");
 
   useEffect(() => {
     loadMyPosts();
@@ -195,212 +198,87 @@ export function MyPostsPage() {
         <p className="text-gray-600 mt-2">
           Manage your listings ({totalPosts} total)
         </p>
+        <div className="flex items-center gap-2 mt-4">
+          <span className="text-sm font-medium text-gray-600">Show:</span>
+          <Button
+            size="sm"
+            variant={sectionFilter === "all" ? "primary" : "outline"}
+            onClick={() => setSectionFilter("all")}
+          >
+            All ({totalPosts})
+          </Button>
+          <Button
+            size="sm"
+            variant={sectionFilter === "thrift" ? "primary" : "outline"}
+            onClick={() => setSectionFilter("thrift")}
+          >
+            Thrift ({thriftItems.length})
+          </Button>
+          <Button
+            size="sm"
+            variant={sectionFilter === "lostfound" ? "primary" : "outline"}
+            onClick={() => setSectionFilter("lostfound")}
+          >
+            Lost & Found ({lostFoundItems.length})
+          </Button>
+        </div>
       </div>
 
       {/* Thrift Store Items */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          Thrift Store ({thriftItems.length})
-        </h2>
-
-        {thriftItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">No thrift items posted yet</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {thriftItems.map((item) => (
-              <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                      <p className="text-sm">No photo</p>
-                    </div>
-                  )}
-                </div>
-
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-2xl font-bold text-green-600 mb-2">
-                  ${item.price}
-                </p>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                  {item.description}
-                </p>
-
-                <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                  {item.condition && <span>{item.condition}</span>}
-                  {item.category && <span>{item.category}</span>}
-                </div>
-
-                <div className="text-xs text-gray-400 mb-3">
-                  Posted {new Date(item.created_at).toLocaleDateString()}
-                </div>
-
-                {/* Edit and Delete buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEditThrift(item)}
-                    className="flex-1 text-blue-600 border-blue-600 hover:bg-blue-50"
-                  >
-                    Edit
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDeleteThrift(item.id, item.title)}
-                    className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Lost & Found Items */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Lost & Found ({lostFoundItems.length})
+      {(sectionFilter === "all" || sectionFilter === "thrift") && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Thrift Store ({thriftItems.length})
           </h2>
 
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant={lostFoundFilter === "all" ? "primary" : "outline"}
-              onClick={() => setLostFoundFilter("all")}
-            >
-              All ({lostFoundItems.length})
-            </Button>
-            <Button
-              size="sm"
-              variant={lostFoundFilter === "lost" ? "primary" : "outline"}
-              onClick={() => setLostFoundFilter("lost")}
-              className={
-                lostFoundFilter === "lost"
-                  ? "bg-red-600 hover:bg-red-700 text-white"
-                  : ""
-              }
-            >
-              Lost ({lostFoundItems.filter((i) => i.type === "lost").length})
-            </Button>
-            <Button
-              size="sm"
-              variant={lostFoundFilter === "found" ? "primary" : "outline"}
-              onClick={() => setLostFoundFilter("found")}
-              className={
-                lostFoundFilter === "found"
-                  ? "bg-green-600 hover:bg-green-700 text-white"
-                  : ""
-              }
-            >
-              Found ({lostFoundItems.filter((i) => i.type === "found").length})
-            </Button>
-          </div>
-        </div>
+          {thriftItems.length === 0 ? (
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <p className="text-gray-500">No thrift items posted yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {thriftItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white p-6 rounded-xl shadow-lg"
+                >
+                  <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <p className="text-sm">No photo</p>
+                      </div>
+                    )}
+                  </div>
 
-        {filteredLostFoundItems.length === 0 ? (
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <p className="text-gray-500">
-              {lostFoundFilter === "all" // 
-                ? "No lost/found items posted yet"
-                : `No ${lostFoundFilter} items posted yet`}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredLostFoundItems.map((item) => (
-              <div key={item.id} className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-400">
-                      <p className="text-sm">No photo</p>
-                    </div>
-                  )}
-                </div>
+                  <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                  <p className="text-2xl font-bold text-green-600 mb-2">
+                    ${item.price}
+                  </p>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                    {item.description}
+                  </p>
 
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      item.type === "lost"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {item.type.toUpperCase()}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(item.date).toLocaleDateString()}
-                  </span>
-                </div>
+                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                    {item.condition && <span>{item.condition}</span>}
+                    {item.category && <span>{item.category}</span>}
+                  </div>
 
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-                <div className="text-sm text-gray-500 mb-3">
-                  Location: {item.location}
-                </div>
+                  <div className="text-xs text-gray-400 mb-3">
+                    Posted {new Date(item.created_at).toLocaleDateString()}
+                  </div>
 
-                <div className="text-xs text-gray-400 mb-3">
-                  Posted {new Date(item.created_at).toLocaleDateString()}
-                </div>
-
-                {/*  Status Badge */}
-                <div className="mb-3">
-                  {item.status === "reunited" ? (
-                    <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
-                      ✅ Reunited
-                    </span>
-                  ) : (
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                      📍 Active
-                    </span>
-                  )}
-                </div>
-
-                {/*  Buttons with Status toggle */}
-                <div className="flex flex-col gap-2">
-                  {/* Status toggle button */}
-                  {item.status === "active" ? (
-                    <Button
-                      size="sm"
-                      onClick={() => handleMarkAsReunited(item.id)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      ✅ Mark as Reunited
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => handleMarkAsActive(item.id)}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      📍 Mark as Active
-                    </Button>
-                  )}
-
-                  {/* Edit and Delete */}
+                  {/* Edit and Delete buttons */}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleEditLostFound(item)}
+                      onClick={() => handleEditThrift(item)}
                       className="flex-1 text-blue-600 border-blue-600 hover:bg-blue-50"
                     >
                       Edit
@@ -409,18 +287,182 @@ export function MyPostsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleDeleteLostFound(item.id, item.title)}
+                      onClick={() => handleDeleteThrift(item.id, item.title)}
                       className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
                     >
                       Delete
                     </Button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Lost & Found Items */}
+      {(sectionFilter === "all" || sectionFilter === "lostfound") && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Lost & Found ({lostFoundItems.length})
+            </h2>
+
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant={lostFoundFilter === "all" ? "primary" : "outline"}
+                onClick={() => setLostFoundFilter("all")}
+              >
+                All ({lostFoundItems.length})
+              </Button>
+              <Button
+                size="sm"
+                variant={lostFoundFilter === "lost" ? "primary" : "outline"}
+                onClick={() => setLostFoundFilter("lost")}
+                className={
+                  lostFoundFilter === "lost"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : ""
+                }
+              >
+                Lost ({lostFoundItems.filter((i) => i.type === "lost").length})
+              </Button>
+              <Button
+                size="sm"
+                variant={lostFoundFilter === "found" ? "primary" : "outline"}
+                onClick={() => setLostFoundFilter("found")}
+                className={
+                  lostFoundFilter === "found"
+                    ? "bg-green-600 hover:bg-green-700 text-white"
+                    : ""
+                }
+              >
+                Found ({lostFoundItems.filter((i) => i.type === "found").length}
+                )
+              </Button>
+            </div>
           </div>
-        )}
-      </div>
+
+          {filteredLostFoundItems.length === 0 ? (
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <p className="text-gray-500">
+                {lostFoundFilter === "all" //
+                  ? "No lost/found items posted yet"
+                  : `No ${lostFoundFilter} items posted yet`}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredLostFoundItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white p-6 rounded-xl shadow-lg"
+                >
+                  <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden">
+                    {item.image_url ? (
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400">
+                        <p className="text-sm">No photo</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        item.type === "lost"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {item.type.toUpperCase()}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {new Date(item.date).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {item.description}
+                  </p>
+                  <div className="text-sm text-gray-500 mb-3">
+                    Location: {item.location}
+                  </div>
+
+                  <div className="text-xs text-gray-400 mb-3">
+                    Posted {new Date(item.created_at).toLocaleDateString()}
+                  </div>
+
+                  {/*  Status Badge */}
+                  <div className="mb-3">
+                    {item.status === "reunited" ? (
+                      <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                        ✅ Reunited
+                      </span>
+                    ) : (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                        📍 Active
+                      </span>
+                    )}
+                  </div>
+
+                  {/*  Buttons with Status toggle */}
+                  <div className="flex flex-col gap-2">
+                    {/* Status toggle button */}
+                    {item.status === "active" ? (
+                      <Button
+                        size="sm"
+                        onClick={() => handleMarkAsReunited(item.id)}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        ✅ Mark as Reunited
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => handleMarkAsActive(item.id)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        📍 Mark as Active
+                      </Button>
+                    )}
+
+                    {/* Edit and Delete */}
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditLostFound(item)}
+                        className="flex-1 text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleDeleteLostFound(item.id, item.title)
+                        }
+                        className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Edit Modal */}
       {showEditModal && editingItem && (

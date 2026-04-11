@@ -156,7 +156,7 @@ export function ThriftPage() {
                 <img
                   src={item.image_url}
                   alt={item.title}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="text-center text-gray-400">

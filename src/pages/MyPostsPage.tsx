@@ -419,16 +419,18 @@ export function MyPostsPage() {
                     {item.status === "active" ? (
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={() => handleMarkAsReunited(item.id)}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        className="w-full text-green-600 border-green-600 hover:bg-green-50"
                       >
                         ✅ Mark as Reunited
                       </Button>
                     ) : (
                       <Button
                         size="sm"
+                        variant="outline"
                         onClick={() => handleMarkAsActive(item.id)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
                       >
                         📍 Mark as Active
                       </Button>

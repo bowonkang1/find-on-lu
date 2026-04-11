@@ -205,7 +205,7 @@ async function findMatchingLostItems(foundItem) {
         similarity = similarity * 0.5; // 50% 감소
       }
 
-      console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
+      console.log(`Similarity: ${(similarity * 100).toFixed(1)}%`);
 
       if (similarity > 0.7) {
         let confidence = "Good";
@@ -321,7 +321,7 @@ async function notifyMatchedUsers(matches, foundItem) {
         from: "Find On LU <onboarding@resend.dev>",
         to: [match.item.user_email],
         subject: subject,
-        html: htmlBody, // ✅ 변경됨
+        html: htmlBody, // 
       });
 
       if (error) {

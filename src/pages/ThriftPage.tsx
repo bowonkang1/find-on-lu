@@ -14,7 +14,7 @@ interface ThriftItem {
   image_url?: string;
   user_email: string;
   created_at: string;
-  status: 'available' | 'pending' | 'sold'; // default 'available' in Supabase
+  status: "available" | "pending" | "sold"; // default 'available' in Supabase
   user_id: string; // uuid in Supabase
 }
 
@@ -89,16 +89,28 @@ export function ThriftPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Thrift Store</h1>
-          <p className="text-gray-600 mt-2">Buy and sell pre-loved items</p>
+      <div className="mb-8">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Thrift Store
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
+              Buy and sell pre-loved items
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            size="sm"
+            className="whitespace-nowrap text-sm sm:text-base"
+          >
+            Post Item
+          </Button>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>Post Item</Button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm mb-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <svg
               className="absolute left-3 top-3 h-4 w-4 text-gray-400"
@@ -126,11 +138,11 @@ export function ThriftPage() {
               </p>
             )}
           </div>
-          <div className="mb-6">
+          <div>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
+              className="w-full md:w-64 px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500 focus:border-lu-blue-500"
             >
               <option value="all">All Categories</option>
               <option value="Electronics">Electronics</option>

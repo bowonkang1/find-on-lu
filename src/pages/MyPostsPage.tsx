@@ -198,12 +198,15 @@ export function MyPostsPage() {
         <p className="text-gray-600 mt-2">
           Manage your listings ({totalPosts} total)
         </p>
-        <div className="flex items-center gap-2 mt-4">
-          <span className="text-sm font-medium text-gray-600">Show:</span>
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          <span className="text-xs sm:text-sm font-medium text-gray-600">
+            Show:
+          </span>
           <Button
             size="sm"
             variant={sectionFilter === "all" ? "primary" : "outline"}
             onClick={() => setSectionFilter("all")}
+            className="text-xs sm:text-sm px-2 sm:px-3"
           >
             All ({totalPosts})
           </Button>

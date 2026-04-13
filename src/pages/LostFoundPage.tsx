@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
-import { getLostFoundItems } from '../lib/supabaseService';
+import { getLostFoundItems } from "../lib/supabaseService";
 
 interface LostFoundItem {
   id: string;
@@ -15,7 +15,7 @@ interface LostFoundItem {
   image_url?: string;
   date: string;
   user_id: string;
-  status: 'active' | 'reunited';
+  status: "active" | "reunited";
 }
 
 export function LostFoundPage() {
@@ -25,37 +25,36 @@ export function LostFoundPage() {
   const [selectedItem, setSelectedItem] = useState<LostFoundItem | null>(null);
   const [items, setItems] = useState<LostFoundItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   //Fetch items from supabase when page loads
-  useEffect(()=> {
+  useEffect(() => {
     loadItems();
-  },[])
+  }, []);
 
-  async function loadItems(){
-    try{
-      console.log('🔄 Loading items from Supabase...');
+  async function loadItems() {
+    try {
+      console.log("🔄 Loading items from Supabase...");
       setLoading(true);
       const data = await getLostFoundItems();
-      console.log('📦 Received from Supabase:', data);
-      console.log('📊 Item count:', data?.length);
+      console.log("📦 Received from Supabase:", data);
+      console.log("📊 Item count:", data?.length);
 
       setItems(data || []);
-      setError('');
-    }catch (err: any) {
-      console.error('Error loading items:', err);
-      setError('Failed to load items. Please try again.');
+      setError("");
+    } catch (err: any) {
+      console.error("Error loading items:", err);
+      setError("Failed to load items. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   const handleItemPosted = async (newItem: any) => {
-   // After posting, reload items from database
-   console.log('handleItemPosted called!', newItem);
-   await loadItems();
+    // After posting, reload items from database
+    console.log("handleItemPosted called!", newItem);
+    await loadItems();
   };
-
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
@@ -65,8 +64,8 @@ export function LostFoundPage() {
     return matchesSearch && matchesFilter;
   });
 
-   // Show loading state
-   if (loading) {
+  // Show loading state
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
@@ -77,35 +76,46 @@ export function LostFoundPage() {
     );
   }
 
-   // Show error state
-   if (error) {
+  // Show error state
+  if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-100 text-red-700 p-4 rounded-lg">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
-          <Button onClick={loadItems} className="mt-4">Try Again</Button>
+          <Button onClick={loadItems} className="mt-4">
+            Try Again
+          </Button>
         </div>
       </div>
     );
   }
 
-
   return (
     //header
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Lost & Found</h1>
-          <p className="text-gray-600 mt-2">
-            Help find lost items or report found items
-          </p>
+      <div className="mb-8">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Lost & Found
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
+              Help find lost items or report found items
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            size="sm"
+            className="whitespace-nowrap text-sm sm:text-base"
+          >
+            Post Item
+          </Button>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>Post Item</Button>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm mb-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex-1 relative">
             <svg
               className="absolute left-3 top-3 h-4 w-4 text-gray-400"
@@ -128,7 +138,7 @@ export function LostFoundPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500"
             />
-             {/*for showing the number of results*/}
+            {/*for showing the number of results*/}
             {searchTerm && (
               <p className="text-sm text-gray-600 mt-2">
                 Found {filteredItems.length} items
@@ -172,7 +182,7 @@ export function LostFoundPage() {
             }}
           >
             <div className="w-full h-48 bg-gray-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-              {item.image_url ?  (
+              {item.image_url ? (
                 <img
                   src={item.image_url}
                   alt={item.title}
@@ -207,7 +217,9 @@ export function LostFoundPage() {
               >
                 {item.type.toUpperCase()}
               </span>
-              <span className="text-sm text-gray-500">{new Date(item.date).toLocaleDateString()}</span>
+              <span className="text-sm text-gray-500">
+                {new Date(item.date).toLocaleDateString()}
+              </span>
             </div>
 
             <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
@@ -215,7 +227,7 @@ export function LostFoundPage() {
 
             <div className="text-sm text-gray-500 mb-4">
               <div>Location: {item.location}</div>
-              <div>Posted by: {item.user_email.split('@')[0]}</div>
+              <div>Posted by: {item.user_email.split("@")[0]}</div>
             </div>
 
             <Button
@@ -223,7 +235,7 @@ export function LostFoundPage() {
               className="w-full"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent card click when clicking button
-                const posterName = item.user_email.split('@')[0];
+                const posterName = item.user_email.split("@")[0];
                 const subject = `Found your ${item.type} item: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
                 const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${

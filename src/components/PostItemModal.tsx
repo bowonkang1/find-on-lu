@@ -76,6 +76,36 @@ export function PostItemModal({
           date: new Date().toISOString().split("T")[0],
           image_url: imageUrl,
         });
+
+        // Generate embedding for lost items
+        if (formData.itemType === "lost") {
+          try {
+            console.log("🤖 Generating embedding for lost item...");
+
+            const itemText = `${formData.title} ${formData.description} ${formData.location}`;
+
+            fetch("/api/generate-embedding", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                text: itemText,
+                itemId: savedItem.id,
+              }),
+            })
+              .then((response) => {
+                if (response.ok) {
+                  console.log("✅ Embedding generated successfully");
+                } else {
+                  console.warn("⚠️ Embedding generation failed");
+                }
+              })
+              .catch((error) => {
+                console.error("⚠️ Embedding error:", error);
+              });
+          } catch (embError) {
+            console.error("⚠️ Embedding error:", embError);
+          }
+        }
       }
 
       console.log("✅ Item saved to database:", savedItem);
@@ -99,7 +129,7 @@ export function PostItemModal({
             data: { user },
           } = await supabase.auth.getUser();
 
-          // ✅ Trigger background job (don't wait for it)
+          // Trigger background job (don't wait for it)
           fetch("/api/match-items", {
             method: "POST",
             headers: {
@@ -126,7 +156,7 @@ export function PostItemModal({
               console.error("❌ Error triggering background job:", error);
             });
 
-          // ✅ User sees instant success - emails sent in background
+          //  User sees instant success - emails sent in background
           alert("Item posted successfully! AI is checking for matches...");
         } catch (error) {
           console.error("⚠️ Failed to trigger background job:", error);

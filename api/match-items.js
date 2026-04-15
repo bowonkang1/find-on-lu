@@ -107,35 +107,37 @@ function cosineSimilarity(a, b) {
 
 async function findMatchingLostItems(foundItem) {
   try {
-    console.log(" AI: Starting matching for found item...");
+    console.log("🤖 AI: Starting matching for found item...");
 
-    // Create text representation
+    // Generate embedding for found item only
     let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
 
-    // If image exists, analyze it and add to text
+    // Analyze image (found item only)
     if (foundItem.image_url) {
-      console.log("🖼️ Found item has image, analyzing...");
+      console.log("🖼️ Analyzing found item image...");
       const imageAnalysis = await analyzeImage(foundItem.image_url);
       if (imageAnalysis) {
         foundText = `${foundText} ${imageAnalysis}`;
-        console.log("✅ Enhanced description with image analysis");
       }
     }
 
-    console.log("🤖 Found item text:", foundText);
-
-    // Get embedding for found item
-    console.log("🤖 Getting embedding for found item...");
+    console.log("🤖 Generating found item embedding...");
     const foundEmbedding = await getEmbedding(foundText);
     console.log("✅ Found item embedding generated");
 
-    // Get all active lost items from database
-    console.log("🤖 Fetching lost items from database...");
+    // Fetch lost items with embeddings from database
+    console.log("🤖 Fetching lost items with embeddings from database...");
+
+    const MAX_COMPARISONS = 50;
+    const MAX_MATCHES_TO_NOTIFY = 3;
+
     const { data: lostItems, error } = await supabase
       .from("lost_found_items")
       .select("*")
       .eq("type", "lost")
-      .eq("status", "active");
+      .eq("status", "active")
+      .not("embedding", "is", null) // Only items with embeddings
+      .order("created_at", { ascending: false }) // Most recent first
 
     if (error) {
       console.error("❌ Database error:", error);
@@ -143,38 +145,15 @@ async function findMatchingLostItems(foundItem) {
     }
 
     if (!lostItems || lostItems.length === 0) {
-      console.log("🤖 No lost items in database to match against");
+      console.log("🤖 No lost items with embeddings found");
       return [];
     }
 
-    console.log(`🤖 Comparing against ${lostItems.length} lost items...`);
-
-    //  Analyze ALL images in parallel
-    console.log("🖼️ Analyzing all images in parallel...");
-    const lostItemsWithAnalysis = await Promise.all(
-      lostItems.map(async (lostItem) => {
-        let lostText = `${lostItem.title} ${lostItem.description} ${lostItem.location || ""}`;
-
-        if (lostItem.image_url) {
-          try {
-            const imageAnalysis = await analyzeImage(lostItem.image_url);
-            if (imageAnalysis) {
-              lostText = `${lostText} ${imageAnalysis}`;
-            }
-          } catch (error) {
-            console.error(
-              `   ⚠️ Failed to analyze image for "${lostItem.title}"`
-            );
-          }
-        }
-
-        return { ...lostItem, enhancedText: lostText };
-      })
+    console.log(
+      `🤖 Comparing against ${lostItems.length} lost items (max: ${MAX_COMPARISONS})...`
     );
 
-    console.log(" All images analyzed!");
-
-    // Calculate similarities
+    // Calculate similarity only (no embedding generation!)
     const matches = [];
 
     // Extract found item color
@@ -185,37 +164,51 @@ async function findMatchingLostItems(foundItem) {
       console.log(`🎨 Found item color detected: ${foundColor}`);
     }
 
-    for (let i = 0; i < lostItemsWithAnalysis.length; i++) {
-      const lostItem = lostItemsWithAnalysis[i];
+    let comparisonCount = 0;
+    let matchCount = 0;
+
+    for (const lostItem of lostItems) {
+      // Stop after finding max matches
+      if (matchCount >= MAX_MATCHES_TO_NOTIFY) {
+        console.log(`✋ Found ${matchCount} strong matches, stopping`);
+        break;
+      }
+
+      comparisonCount++;
       console.log(
-        `🤖 Checking lost item ${i + 1}/${lostItemsWithAnalysis.length}: "${lostItem.title}"`
+        `🤖 Checking lost item ${comparisonCount}/${lostItems.length}: "${lostItem.title}"`
       );
 
-      const lostEmbedding = await getEmbedding(lostItem.enhancedText);
-      let similarity = cosineSimilarity(foundEmbedding, lostEmbedding); // ← let으로 변경!
+      // Use embedding from database!
+      const lostEmbedding = lostItem.embedding;
 
-      // 색상 페널티 추가
+      // Calculate similarity (local, fast!)
+      let similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
+
+      // Color penalty
       const lostColor = extractColor(
         `${lostItem.title} ${lostItem.description}`
       );
       if (foundColor && lostColor && foundColor !== lostColor) {
         console.log(
-          `    Color mismatch: ${foundColor} vs ${lostColor} - applying 50% penalty`
+          `   ⚠️ Color mismatch: ${foundColor} vs ${lostColor} - applying 50% penalty`
         );
-        similarity = similarity * 0.5; // 50% 감소
+        similarity = similarity * 0.5;
       }
 
-      console.log(`Similarity: ${(similarity * 100).toFixed(1)}%`);
+      console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
 
+      // Match only if 70%+ similar
       if (similarity > 0.7) {
         let confidence = "Good";
         if (similarity > 0.85) confidence = "Very High";
         else if (similarity > 0.8) confidence = "High";
 
         console.log(
-          `    MATCH FOUND! (${(similarity * 100).toFixed(1)}%) - ${confidence} confidence`
+          `   ✅ MATCH! (${(similarity * 100).toFixed(1)}%) - ${confidence} confidence`
         );
 
+        matchCount++;
         matches.push({
           item: lostItem,
           score: similarity,
@@ -228,6 +221,10 @@ async function findMatchingLostItems(foundItem) {
     console.log(
       `🎉 AI matching complete! Found ${matches.length} potential matches`
     );
+    console.log(
+      `📊 Compared: ${comparisonCount} items, Matched: ${matchCount} items`
+    );
+
     return matches;
   } catch (error) {
     console.error("❌ AI matching error:", error);
@@ -236,9 +233,22 @@ async function findMatchingLostItems(foundItem) {
 }
 
 async function notifyMatchedUsers(matches, foundItem) {
-  console.log(`📧 Notifying ${matches.length} matched users...`);
+  // Notify top 3 matches only
+  const MAX_MATCHES_TO_NOTIFY = 3;
+  const topMatches = matches.slice(0, MAX_MATCHES_TO_NOTIFY);
 
-  for (const match of matches) {
+  console.log(
+    `📧 Notifying top ${topMatches.length} users (${matches.length} total matches)`
+  );
+
+  if (matches.length > MAX_MATCHES_TO_NOTIFY) {
+    console.log(
+      `ℹ️ Skipping ${matches.length - MAX_MATCHES_TO_NOTIFY} lower-confidence matches`
+    );
+  }
+
+  for (const match of topMatches) {
+    // Changed: matches → topMatches
     try {
       const matchPercent = Math.round(match.score * 100);
       const confidence = match.confidence || "Good";
@@ -321,7 +331,7 @@ async function notifyMatchedUsers(matches, foundItem) {
         from: "Find On LU <onboarding@resend.dev>",
         to: [match.item.user_email],
         subject: subject,
-        html: htmlBody, // 
+        html: htmlBody, //
       });
 
       if (error) {

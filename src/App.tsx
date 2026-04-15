@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { LostFoundPage } from './pages/LostFoundPage';
 import { ThriftPage } from './pages/ThriftPage';
 import { MyPostsPage } from './pages/MyPostsPage';
+import { HelpPage } from './pages/HelpPage';
 
 
 //impors all the components app needs to assemble application
@@ -91,6 +92,7 @@ function App() {
           <Route path="/lost-found" element={<LostFoundPage />} />
           <Route path="/thrift" element={<ThriftPage />} />
           <Route path="/my-posts" element={<MyPostsPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { supabase } from "../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 export function DashboardPage() {
   //add state for real data
@@ -12,11 +13,20 @@ export function DashboardPage() {
     itemsReunited: 0, //tracks how many lost items were matched with their owners
     loading: true, //data is being fetched or not yet loaded
   });
+  const [showWelcome, setShowWelcome] = useState(false);
+  const navigate = useNavigate();
 
   //fetch real data when components loads
   useEffect(() => {
     fetchStats();
   }, []); //[]-> run one time only
+
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
+    if (!hasSeenWelcome) {
+      setShowWelcome(true);
+    }
+  }, []);
 
   const fetchStats = async () => {
     //fechStats-> retrieves data from a supabase and updates web stats
@@ -64,8 +74,87 @@ export function DashboardPage() {
     }
   };
 
+  const handleSkipWelcome = () => {
+    localStorage.setItem("hasSeenWelcome", "true");
+    setShowWelcome(false);
+  };
+
+  const handleReadHelp = () => {
+    localStorage.setItem("hasSeenWelcome", "true");
+    setShowWelcome(false);
+    navigate("/help");
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {showWelcome && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                 Welcome to Find On LU!
+              </h2>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-blue-50 p-3 rounded-lg flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">📱</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Lost & Found</h3>
+                  <p className="text-sm text-gray-600">
+                    Post lost/found items and get AI match notifications via
+                    email
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg flex items-start gap-3">
+                <span className="text-2xl flex-shrink-0">🛒</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Thrift Store</h3>
+                  <p className="text-sm text-gray-700">
+                    Buy and sell with fellow students
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      localStorage.setItem("hasSeenWelcome", "true");
+                    } else {
+                      localStorage.removeItem("hasSeenWelcome");
+                    }
+                  }}
+                />
+                Don't show this again
+              </label>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={handleSkipWelcome}
+                className="flex-1 !text-gray-600 !border-gray-300 hover:!bg-gray-50"
+              >
+                Skip
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleReadHelp}
+                className="flex-1 !text-blue-600 !border-blue-600 hover:!bg-blue-50"
+              >
+                Read Help Guide →
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="text-center mb-8">
         <img
           src="/logo-lawrence.png"

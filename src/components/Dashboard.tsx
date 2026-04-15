@@ -17,6 +17,7 @@ export function Layout({ user, onLogout, children }: LayoutProps) {
     { path: "/lost-found", label: "Lost & Found" },
     { path: "/thrift", label: "Thrift Store" },
     { path: "/my-posts", label: "My Posts" },
+    { path: '/help', label: 'Help' },
   ];
 
   return (

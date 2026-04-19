@@ -1,3 +1,4 @@
+//Database operations
 import { supabase } from './supabase';
 import OpenAI from 'openai';
 

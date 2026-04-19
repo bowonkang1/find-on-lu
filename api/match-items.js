@@ -1,20 +1,26 @@
+//AI matching system
 // Import OpenAI and Supabase at the top
 import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js"; //database client
+import { Resend } from "resend"; //email service
 
+//Initialize openAI client
 const openai = new OpenAI({
+  //Get API key from environment variables
+  //Try OPENAI_API_KEY first, fallback to REACT_APP_OPENAI_API_KEY
   apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
 
+//Initialize Supabase client (database)
 const supabase = createClient(
+  //  Database URL (where data lives)
   process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
+  // API key to access the database
   process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
+// Initialize Resend client (email service)
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-31;
 
 // ==================== HELPER FUNCTIONS ====================
 
@@ -39,11 +45,14 @@ function extractColor(text) {
     "teal",
     "beige",
   ];
+
+  //convert text to lowercase for case-insensitive search
   const lowerText = text.toLowerCase();
 
+  //loop through each color and check if it's in the text
   for (const color of colors) {
     if (lowerText.includes(color)) {
-      return color;
+      return color; //// return first color found
     }
   }
   return null;
@@ -51,50 +60,59 @@ function extractColor(text) {
 
 // ==================== AI FUNCTIONS ====================
 
+//function to convert text into numbers(embeddings)
 async function getEmbedding(text) {
   try {
+
+     // call OpenAI API to create embedding
     const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: text,
-      encoding_format: "float",
+      model: "text-embedding-3-small", // which AI model to use
+      input: text,  // text to convert
+      encoding_format: "float",  // return format (decimal numbers)
     });
     return response.data[0].embedding;
+    //if something goes wrong
   } catch (error) {
     console.error("❌ Embedding failed:", error);
-    throw error;
+    throw error; //re-throw error to stop execution
   }
 }
 
+//function to describe an image using AI
 async function analyzeImage(imageUrl) {
   try {
+    //log which image we're analyzing
     console.log(" Analyzing image:", imageUrl);
 
+    //call OpenAI's vision API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o-mini", // vision model that can "see" images
       messages: [
         {
-          role: "user",
+          role: "user", // we're asking a question
           content: [
             {
-              type: "text",
+              type: "text", //first part-instructions
               text: "Describe this lost/found item in detail. MOST IMPORTANT: Start with the PRIMARY COLOR (this is critical for matching). Then include: brand/type, size, secondary colors, condition, and any distinctive features like stickers, scratches, wear patterns, or unique markings. Be very specific about colors.",
             },
             {
-              type: "image_url",
+              type: "image_url", //second part- the image
               image_url: { url: imageUrl },
             },
           ],
         },
       ],
-      max_tokens: 200,
+      max_tokens: 200, //limit response to 200 words
     });
 
+    // extract AI's description from response
     const aiDescription = response.choices[0].message.content || "";
     console.log("✅ AI image analysis:", aiDescription);
     return aiDescription;
   } catch (error) {
+    //if image analysis fails
     console.error("❌ Image analysis failed:", error);
-    return "";
+    return ""; //return empty string (continue without image description)
   }
 }
 
@@ -138,6 +156,7 @@ async function findMatchingLostItems(foundItem) {
       .eq("status", "active")
       .not("embedding", "is", null) // Only items with embeddings
       .order("created_at", { ascending: false }) // Most recent first
+      .limit(MAX_COMPARISONS);
 
     if (error) {
       console.error("❌ Database error:", error);

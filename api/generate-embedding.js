@@ -1,3 +1,4 @@
+//Generates and saves embeddings for Lost items
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 

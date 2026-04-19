@@ -140,22 +140,22 @@ export function MyPostsPage() {
 
     try {
       await updateItemStatus(itemId, "reunited");
-      alert(" Item marked as reunited!");
+      alert("Item marked as reunited!");
       loadMyPosts(); // Refresh the list
     } catch (error) {
       console.error("Error updating status:", error);
-      alert(" Failed to update status");
+      alert("Failed to update status");
     }
   }
 
   async function handleMarkAsActive(itemId: string) {
     try {
       await updateItemStatus(itemId, "active");
-      alert(" Item marked as active again!");
+      alert("Item marked as active again!");
       loadMyPosts(); // Refresh the list
     } catch (error) {
       console.error("Error updating status:", error);
-      alert(" Failed to update status");
+      alert("Failed to update status");
     }
   }
 

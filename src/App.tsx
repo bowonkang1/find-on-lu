@@ -1,7 +1,7 @@
+//Main app routing
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-//import { LoginForm } from './components/auth/LoginForm';
 import { Layout } from './components/Dashboard';
 import { AuthForm } from './components/auth/AuthForm';
 import { DashboardPage } from './pages/DashboardPage';
@@ -11,7 +11,7 @@ import { MyPostsPage } from './pages/MyPostsPage';
 import { HelpPage } from './pages/HelpPage';
 
 
-//impors all the components app needs to assemble application
+// Imports all the components the app needs to assemble the application
 interface User {
   email: string;
   id: string

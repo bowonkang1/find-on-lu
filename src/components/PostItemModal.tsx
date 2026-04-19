@@ -1,3 +1,4 @@
+//Handles posting Lost/Found items
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -109,14 +110,6 @@ export function PostItemModal({
       }
 
       console.log("✅ Item saved to database:", savedItem);
-      console.log(
-        "🔑 OpenAI key exists?",
-        !!process.env.REACT_APP_OPENAI_API_KEY
-      );
-      alert("CHECKPOINT 1: Item saved");
-      console.log("🔍 CHECKPOINT 1: Item saved");
-      console.log("🔍 type:", type);
-      console.log("🔍 formData.itemType:", formData.itemType);
 
       // ============================================
       // 🤖 AI MATCHING FOR FOUND ITEMS (Background Job)

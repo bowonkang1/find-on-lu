@@ -16,7 +16,7 @@ export function HelpPage() {
       {/* Quick Start */}
       <section className="mb-10 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl">
         <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <span className="mr-2">🎯</span> Quick Start
+          <span className="mr-2"></span> Quick Start
         </h2>
         <div className="space-y-2 text-gray-700">
           <p><strong>Lost something?</strong> Post it → Get AI match emails → Mark as Reunited when found</p>
@@ -28,7 +28,7 @@ export function HelpPage() {
       {/* Install as an App */}
       <section className="mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <span className="mr-2">📱</span> Install as an App
+          <span className="mr-2"></span> Install as an App
         </h2>
         <p className="text-gray-700 mb-4">Use Find On LU like a real app!</p>
         
@@ -52,15 +52,6 @@ export function HelpPage() {
               <li>Launch from your app drawer!</li>
             </ol>
           </div>
-        </div>
-        
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <p className="font-semibold text-sm mb-1">Benefits:</p>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>✅ Faster access - just like a native app</li>
-            <li>✅ No browser bars - full screen experience</li>
-            <li>✅ Works offline (for viewing your posts)</li>
-          </ul>
         </div>
       </section>
 

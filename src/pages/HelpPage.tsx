@@ -19,9 +19,9 @@ export function HelpPage() {
           <span className="mr-2"></span>Quick Start
         </h2>
         <div className="space-y-2 text-gray-700">
-          <p><strong>Lost something?</strong> Post it → Get AI match emails → Mark as Reunited when found</p>
-          <p><strong>Found something?</strong> Post it → AI notifies the owner → Delete after returning it</p>
-          <p><strong>Selling stuff?</strong> Post price & photos → Buyers contact you → Meet safely on campus</p>
+          <p><strong>Lost something?</strong> Post it → You may get AI match emails → Mark as Reunited when found</p>
+          <p><strong>Found something?</strong> Post it → If a likely match is detected, the owner may be notified → Delete after returning it</p>
+          <p><strong>Selling stuff?</strong> Post price &amp; photos → Buyers can reach you with the Contact button (email) → Meet safely on campus</p>
         </div>
       </section>
 
@@ -31,7 +31,10 @@ export function HelpPage() {
           <span className="mr-2"></span>Install as an App
         </h2>
         <p className="text-gray-700 mb-4">Use Find On LU like a real app!</p>
-        
+        <p className="text-sm text-gray-600 mb-4">
+          This adds a shortcut on your home screen for faster access. You still need internet to load the latest posts.
+        </p>
+
         <div className="grid md:grid-cols-2 gap-6 mb-4">
           <div>
             <h3 className="font-semibold text-lg mb-2">iPhone (Safari):</h3>
@@ -66,7 +69,7 @@ export function HelpPage() {
           <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
             <li>Upload a clear photo</li>
             <li>Describe: color, brand, location, when lost</li>
-            <li>Check your email for AI match notifications</li>
+            <li>If someone posts a found item that might match yours, you may get an email—check your Lawrence inbox</li>
           </ol>
         </div>
         
@@ -74,7 +77,7 @@ export function HelpPage() {
           <h3 className="font-semibold text-lg mb-3">Post a Found Item</h3>
           <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
             <li>Upload a photo and location</li>
-            <li>Owner gets notified automatically</li>
+            <li>If a likely match is detected, the owner may be notified</li>
             <li>Delete your post after returning it</li>
           </ol>
         </div>
@@ -82,7 +85,7 @@ export function HelpPage() {
         <div className="bg-green-50 p-4 rounded-lg">
           <h3 className="font-semibold mb-2">When Reunited</h3>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li><strong>Lost owners:</strong> Click "Mark as Reunited" (stops emails, keeps record)</li>
+            <li><strong>Lost owners:</strong> Click "Mark as Reunited" (stops active listing &amp; matching for that post, keeps record)</li>
             <li><strong>Found posters:</strong> Click "Delete" (removes from system)</li>
           </ul>
         </div>
@@ -95,13 +98,13 @@ export function HelpPage() {
         </h2>
         
         <p className="text-gray-700 mb-4">
-          <strong>How it works:</strong> Our AI compares photos and descriptions to find matches automatically.
+          <strong>How it works:</strong> The system compares descriptions (and sometimes image details) to suggest possible matches.
         </p>
         
         <div className="mb-4">
           <p className="font-semibold mb-2">What to do:</p>
           <ul className="space-y-1 text-sm text-gray-700">
-            <li>• Lost item owners get email notifications</li>
+            <li>• Lost item owners may receive email notifications</li>
             <li>• Verify details before meeting</li>
             <li>• AI suggests matches - you confirm they're correct</li>
           </ul>
@@ -110,7 +113,8 @@ export function HelpPage() {
         <div className="bg-purple-50 p-4 rounded-lg">
           <p className="font-semibold text-sm mb-1">Privacy:</p>
           <p className="text-sm text-gray-700">
-            Only potential matches see your email. No public contact info.
+            Listings show a short poster name (the part before @ in your Lawrence email), not your full address on the card.
+            Match-related emails may go to people involved when the system finds a plausible link—treat those as hints and verify in person.
           </p>
         </div>
       </section>
@@ -125,7 +129,7 @@ export function HelpPage() {
           <div>
             <h3 className="font-semibold mb-2">Desktop:</h3>
             <p className="text-sm text-gray-700">
-              When you click "Contact" or "Contact Seller," Outlook opens with everything pre-filled (subject and message). Just click Send!
+              When you click "Contact" or "Contact Seller," Outlook on the web usually opens with the subject and message already filled in—review and send.
             </p>
           </div>
           
@@ -140,7 +144,7 @@ export function HelpPage() {
         <div className="mt-4 bg-gray-50 p-4 rounded-lg">
           <p className="font-semibold text-sm mb-1">Tips:</p>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• The recipient's email address is always filled in automatically</li>
+            <li>• On desktop, Outlook usually opens with the recipient (To) already filled from the button; mobile can vary by app</li>
             <li>• Keep your messages polite and specific</li>
             <li>• Include details about the item to help verify it's yours</li>
           </ul>
@@ -206,7 +210,7 @@ export function HelpPage() {
           <ul className="text-sm text-gray-700 space-y-1">
             <li>• Check Lawrence email daily</li>
             <li>• Respond within 24-48 hours</li>
-            <li>• Mark items as Reunited to stop duplicate emails</li>
+            <li>• Mark lost items as Reunited when you&apos;re done so they don&apos;t keep getting match suggestions</li>
             <li>• Delete old posts to keep the platform clean</li>
           </ul>
         </div>
@@ -231,7 +235,7 @@ export function HelpPage() {
           
           <div>
             <p className="font-semibold text-sm mb-1">Marked as Reunited by mistake?</p>
-            <p className="text-sm text-gray-700">Click "Mark as Active" to turn AI matching back on.</p>
+            <p className="text-sm text-gray-700">Click &quot;Mark as Active&quot; so the listing is active again and can appear in matching.</p>
           </div>
           
           <div>

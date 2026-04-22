@@ -1,25 +1,17 @@
-//AI matching system
-// Import OpenAI and Supabase at the top
+// Found-item matching: embeddings + similarity scoring + optional Resend emails.
 import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js"; //database client
-import { Resend } from "resend"; //email service
+import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
-//Initialize openAI client
 const openai = new OpenAI({
-  //Get API key from environment variables
-  //Try OPENAI_API_KEY first, fallback to REACT_APP_OPENAI_API_KEY
   apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
 
-//Initialize Supabase client (database)
 const supabase = createClient(
-  //  Database URL (where data lives)
   process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
-  // API key to access the database
   process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
-// Initialize Resend client (email service)
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==================== HELPER FUNCTIONS ====================
@@ -46,13 +38,11 @@ function extractColor(text) {
     "beige",
   ];
 
-  //convert text to lowercase for case-insensitive search
   const lowerText = text.toLowerCase();
 
-  //loop through each color and check if it's in the text
   for (const color of colors) {
     if (lowerText.includes(color)) {
-      return color; //// return first color found
+      return color;
     }
   }
   return null;
@@ -60,59 +50,50 @@ function extractColor(text) {
 
 // ==================== AI FUNCTIONS ====================
 
-//function to convert text into numbers(embeddings)
 async function getEmbedding(text) {
   try {
-
-     // call OpenAI API to create embedding
     const response = await openai.embeddings.create({
-      model: "text-embedding-3-small", // which AI model to use
-      input: text,  // text to convert
-      encoding_format: "float",  // return format (decimal numbers)
+      model: "text-embedding-3-small",
+      input: text,
+      encoding_format: "float",
     });
     return response.data[0].embedding;
-    //if something goes wrong
   } catch (error) {
     console.error("❌ Embedding failed:", error);
-    throw error; //re-throw error to stop execution
+    throw error;
   }
 }
 
-//function to describe an image using AI
 async function analyzeImage(imageUrl) {
   try {
-    //log which image we're analyzing
     console.log(" Analyzing image:", imageUrl);
 
-    //call OpenAI's vision API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // vision model that can "see" images
+      model: "gpt-4o-mini",
       messages: [
         {
-          role: "user", // we're asking a question
+          role: "user",
           content: [
             {
-              type: "text", //first part-instructions
+              type: "text",
               text: "Describe this lost/found item in detail. MOST IMPORTANT: Start with the PRIMARY COLOR (this is critical for matching). Then include: brand/type, size, secondary colors, condition, and any distinctive features like stickers, scratches, wear patterns, or unique markings. Be very specific about colors.",
             },
             {
-              type: "image_url", //second part- the image
+              type: "image_url",
               image_url: { url: imageUrl },
             },
           ],
         },
       ],
-      max_tokens: 200, //limit response to 200 words
+      max_tokens: 200,
     });
 
-    // extract AI's description from response
     const aiDescription = response.choices[0].message.content || "";
     console.log("✅ AI image analysis:", aiDescription);
     return aiDescription;
   } catch (error) {
-    //if image analysis fails
     console.error("❌ Image analysis failed:", error);
-    return ""; //return empty string (continue without image description)
+    return "";
   }
 }
 
@@ -127,10 +108,8 @@ async function findMatchingLostItems(foundItem) {
   try {
     console.log("🤖 AI: Starting matching for found item...");
 
-    // Generate embedding for found item only
     let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
 
-    // Analyze image (found item only)
     if (foundItem.image_url) {
       console.log("🖼️ Analyzing found item image...");
       const imageAnalysis = await analyzeImage(foundItem.image_url);
@@ -143,7 +122,6 @@ async function findMatchingLostItems(foundItem) {
     const foundEmbedding = await getEmbedding(foundText);
     console.log("✅ Found item embedding generated");
 
-    // Fetch lost items with embeddings from database
     console.log("🤖 Fetching lost items with embeddings from database...");
 
     const MAX_COMPARISONS = 50;
@@ -154,8 +132,8 @@ async function findMatchingLostItems(foundItem) {
       .select("*")
       .eq("type", "lost")
       .eq("status", "active")
-      .not("embedding", "is", null) // Only items with embeddings
-      .order("created_at", { ascending: false }) // Most recent first
+      .not("embedding", "is", null)
+      .order("created_at", { ascending: false })
       .limit(MAX_COMPARISONS);
 
     if (error) {
@@ -172,10 +150,8 @@ async function findMatchingLostItems(foundItem) {
       `🤖 Comparing against ${lostItems.length} lost items (max: ${MAX_COMPARISONS})...`
     );
 
-    // Calculate similarity only (no embedding generation!)
     const matches = [];
 
-    // Extract found item color
     const foundColor = extractColor(
       `${foundItem.title} ${foundItem.description}`
     );
@@ -187,7 +163,6 @@ async function findMatchingLostItems(foundItem) {
     let matchCount = 0;
 
     for (const lostItem of lostItems) {
-      // Stop after finding max matches
       if (matchCount >= MAX_MATCHES_TO_NOTIFY) {
         console.log(`✋ Found ${matchCount} strong matches, stopping`);
         break;
@@ -198,13 +173,10 @@ async function findMatchingLostItems(foundItem) {
         `🤖 Checking lost item ${comparisonCount}/${lostItems.length}: "${lostItem.title}"`
       );
 
-      // Use embedding from database!
       const lostEmbedding = lostItem.embedding;
 
-      // Calculate similarity (local, fast!)
       let similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
 
-      // Color penalty
       const lostColor = extractColor(
         `${lostItem.title} ${lostItem.description}`
       );
@@ -217,7 +189,6 @@ async function findMatchingLostItems(foundItem) {
 
       console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
 
-      // Match only if 70%+ similar
       if (similarity > 0.7) {
         let confidence = "Good";
         if (similarity > 0.85) confidence = "Very High";
@@ -252,7 +223,6 @@ async function findMatchingLostItems(foundItem) {
 }
 
 async function notifyMatchedUsers(matches, foundItem) {
-  // Notify top 3 matches only
   const MAX_MATCHES_TO_NOTIFY = 3;
   const topMatches = matches.slice(0, MAX_MATCHES_TO_NOTIFY);
 
@@ -267,7 +237,6 @@ async function notifyMatchedUsers(matches, foundItem) {
   }
 
   for (const match of topMatches) {
-    // Changed: matches → topMatches
     try {
       const matchPercent = Math.round(match.score * 100);
       const confidence = match.confidence || "Good";
@@ -302,15 +271,10 @@ async function notifyMatchedUsers(matches, foundItem) {
       description += `- Location: ${foundItem.location || "Not specified"}\n\n`;
       description += `Please check the details carefully to confirm if this is your item.`;
 
-      // Send email directly via Resend
-      console.log("📧 Sending email to:", match.item.user_email);
-
-      //  App URL
       const appUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}/lost-found`
         : "http://localhost:3000/lost-found";
 
-      // HTML 이메일 본문
       const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #003f87; margin-bottom: 20px;">🎯 Item Match Found!</h2>
@@ -350,7 +314,7 @@ async function notifyMatchedUsers(matches, foundItem) {
         from: "Find On LU <onboarding@resend.dev>",
         to: [match.item.user_email],
         subject: subject,
-        html: htmlBody, //
+        html: htmlBody,
       });
 
       if (error) {
@@ -369,7 +333,6 @@ async function notifyMatchedUsers(matches, foundItem) {
 // ==================== SERVERLESS HANDLER ====================
 
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -383,10 +346,8 @@ export default async function handler(req, res) {
   try {
     console.log("🚀 Background job started for:", foundItem.title);
 
-    // Run AI matching
     const matches = await findMatchingLostItems(foundItem);
 
-    // Send emails if matches found
     if (matches.length > 0) {
       await notifyMatchedUsers(matches, foundItem);
     }

@@ -329,11 +329,19 @@ export async function sendNewItemNotification(params: NewItemEmailParams) {
   `;
 
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      throw new Error('Not authenticated');
+    }
+
     // Call serverless function instead of Resend directly
     const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         to: to,

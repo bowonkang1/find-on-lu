@@ -8,6 +8,7 @@ import {
   uploadItemImage,
 } from "../lib/supabaseService";
 import { supabase } from "../lib/supabase";
+import { convertHeicToJpeg, isHeicFile } from "../lib/imageConversion";
 
 interface PostItemModalProps {
   isOpen: boolean; // Controls if modal shows or hides
@@ -29,6 +30,7 @@ export function PostItemModal({
   // Has onItemPosted function to send data back
 
   const [loading, setLoading] = useState(false);
+  const [convertingImage, setConvertingImage] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -42,6 +44,32 @@ export function PostItemModal({
   });
 
   if (!isOpen) return null;
+
+  const handleImageSelection = async (file: File | null) => {
+    if (!file) {
+      setFormData((prev) => ({ ...prev, image: null }));
+      return;
+    }
+
+    if (!isHeicFile(file)) {
+      setFormData((prev) => ({ ...prev, image: file }));
+      return;
+    }
+
+    try {
+      setConvertingImage(true);
+      const convertedFile = await convertHeicToJpeg(file);
+      setFormData((prev) => ({ ...prev, image: convertedFile }));
+    } catch (error) {
+      console.error("Failed to convert HEIC image:", error);
+      alert(
+        "HEIC image conversion failed. Please try another image or use JPG/PNG."
+      );
+      setFormData((prev) => ({ ...prev, image: null }));
+    } finally {
+      setConvertingImage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -316,10 +344,11 @@ export function PostItemModal({
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            setFormData({ ...formData, image: file });
-                          }} //
+                          onChange={(e) =>
+                            void handleImageSelection(
+                              e.target.files?.[0] || null
+                            )
+                          }
                           className="hidden"
                         />
                       </label>
@@ -347,15 +376,19 @@ export function PostItemModal({
                       or drag and drop
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF up to 5MB
+                      PNG, JPG, GIF, HEIC up to 5MB (HEIC auto-converts to JPG)
                     </p>
+                    {convertingImage && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Converting HEIC image...
+                      </p>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        setFormData({ ...formData, image: file });
-                      }}
+                      onChange={(e) =>
+                        void handleImageSelection(e.target.files?.[0] || null)
+                      }
                       className="hidden"
                     />
                   </label>
@@ -431,8 +464,16 @@ export function PostItemModal({
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1" disabled={loading}>
-                {loading ? "Posting..." : "Post Item"}
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={loading || convertingImage}
+              >
+                {loading
+                  ? "Posting..."
+                  : convertingImage
+                  ? "Converting Image..."
+                  : "Post Item"}
               </Button>
             </div>
           </form>

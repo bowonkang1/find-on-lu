@@ -56,6 +56,14 @@ export function MyPostsPage() {
     loadMyPosts();
   }, []);
 
+  function confirmWhenPageActive(message: string): boolean {
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") {
+      alert("Please switch back to the app tab and try again.");
+      return false;
+    }
+    return window.confirm(message);
+  }
+
   function handleEditThrift(item: ThriftItem) {
     setEditingItem(item);
     setShowEditModal(true);
@@ -107,7 +115,7 @@ export function MyPostsPage() {
   }
 
   async function handleDeleteThrift(id: string, title: string) {
-    if (!window.confirm(`Delete "${title}"?`)) return;
+    if (!confirmWhenPageActive(`Delete "${title}"?`)) return;
 
     try {
       await deleteThriftItem(id);
@@ -119,7 +127,7 @@ export function MyPostsPage() {
   }
 
   async function handleDeleteLostFound(id: string, title: string) {
-    if (!window.confirm(`Delete "${title}"?`)) return;
+    if (!confirmWhenPageActive(`Delete "${title}"?`)) return;
 
     try {
       await deleteLostFoundItem(id);
@@ -131,7 +139,7 @@ export function MyPostsPage() {
   }
   async function handleMarkAsReunited(itemId: string) {
     if (
-      !window.confirm(
+      !confirmWhenPageActive(
         "Mark this item as reunited? It will no longer appear in AI matching."
       )
     ) {

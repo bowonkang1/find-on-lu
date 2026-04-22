@@ -129,12 +129,25 @@ export function PostItemModal({
                 itemId: savedItem.id,
               }),
             })
-              .then((response) => {
+              .then(async (response) => {
                 if (response.ok) {
                   console.log("✅ Embedding generated successfully");
-                } else {
-                  console.warn("⚠️ Embedding generation failed");
+                  return;
                 }
+
+                let details = "";
+                try {
+                  const payload = await response.json();
+                  details = payload?.details || payload?.error || "";
+                } catch {
+                  details = "";
+                }
+
+                console.warn(
+                  "⚠️ Embedding generation failed",
+                  response.status,
+                  details
+                );
               })
               .catch((error) => {
                 console.error("⚠️ Embedding error:", error);

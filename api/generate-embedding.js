@@ -11,6 +11,33 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const requestLog = new Map();
+
+function getClientIp(req) {
+  const forwardedFor = req.headers["x-forwarded-for"];
+  if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  return req.socket?.remoteAddress || "unknown";
+}
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entries = requestLog.get(ip) || [];
+  const recentEntries = entries.filter((ts) => now - ts < RATE_LIMIT_WINDOW_MS);
+
+  if (recentEntries.length >= RATE_LIMIT_MAX_REQUESTS) {
+    requestLog.set(ip, recentEntries);
+    return true;
+  }
+
+  recentEntries.push(now);
+  requestLog.set(ip, recentEntries);
+  return false;
+}
+
 async function getEmbedding(text) {
   try {
     const response = await openai.embeddings.create({
@@ -31,10 +58,32 @@ export default async function handler(req, res) {
   }
 
   try {
+    const ip = getClientIp(req);
+    if (isRateLimited(ip)) {
+      return res.status(429).json({ error: "Too many requests. Try again shortly." });
+    }
+
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token) {
+      return res.status(401).json({ error: "Missing authentication token" });
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      return res.status(401).json({ error: "Invalid or expired authentication token" });
+    }
+
     const { text, itemId } = req.body;
 
     if (!text || !itemId) {
       return res.status(400).json({ error: 'Missing text or itemId' });
+    }
+    if (typeof text !== "string" || text.trim().length === 0 || text.length > 3000) {
+      return res.status(400).json({ error: "Invalid text payload" });
+    }
+    if (typeof itemId !== "string" || itemId.length > 100) {
+      return res.status(400).json({ error: "Invalid itemId" });
     }
 
     console.log(`🤖 Generating embedding for item ${itemId}...`);

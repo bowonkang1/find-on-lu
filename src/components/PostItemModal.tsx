@@ -84,10 +84,18 @@ export function PostItemModal({
             console.log("🤖 Generating embedding for lost item...");
 
             const itemText = `${formData.title} ${formData.description} ${formData.location}`;
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
 
             fetch("/api/generate-embedding", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                ...(session?.access_token
+                  ? { Authorization: `Bearer ${session.access_token}` }
+                  : {}),
+              },
               body: JSON.stringify({
                 text: itemText,
                 itemId: savedItem.id,

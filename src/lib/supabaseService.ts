@@ -1,13 +1,7 @@
 //Database operations
 import { supabase } from './supabase';
-import OpenAI from 'openai';
 
 //const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY);
-
-const openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
 
 // ==================== THRIFT ITEMS ====================
 
@@ -408,167 +402,16 @@ export async function getAllUserEmails(): Promise<string[]> {
 
 // ==================== AI MATCHING FUNCTIONS ====================
 
-// Get embedding (AI vector) for text
-async function getEmbedding(text: string): Promise<number[]> {
-  try {
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: text,
-      encoding_format: "float"
-    });
-    return response.data[0].embedding;
-  } catch (error) {
-    console.error('❌ Embedding failed:', error);
-    throw error;
-  }
-}
-
-//Analyze image and extract visual features
-async function analyzeImage(imageUrl: string): Promise<string> {
-  try {
-    console.log('🖼️ Analyzing image:', imageUrl);
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{
-        role: "user",
-        content: [
-          { 
-            type: "text", 
-            text: "Describe this lost/found item in detail. Include: color, brand/type, size, condition, any distinctive features like stickers, scratches, wear patterns, or unique markings. Be specific and factual." 
-          },
-          { 
-            type: "image_url", 
-            image_url: { url: imageUrl }
-          }
-        ]
-      }],
-      max_tokens: 200
-    });
-
-    const aiDescription = response.choices[0].message.content || '';
-    console.log('✅ AI image analysis:', aiDescription);
-    return aiDescription;
-
-  } catch (error) {
-    console.error('❌ Image analysis failed:', error);
-    return '';
-  }
-}
-
-// Calculate similarity between two vectors (0 = different, 1 = identical)
-function cosineSimilarity(a: number[], b: number[]): number {
-  const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
-  const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
-  return dotProduct / (magnitudeA * magnitudeB);
-}
-
-// Find matching lost items for a found item
+// Client-side OpenAI usage is intentionally disabled.
+// Matching should run through the authenticated server route: /api/match-items.
 export async function findMatchingLostItems(foundItem: {
   title: string;
   description: string;
   location?: string;
   image_url?: string; 
 }): Promise<any[]> {
-  try {
-    console.log('🤖 AI: Starting matching for found item...');
-    
-    // Create text representation
-    let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ''}`;
-    
-    //  If image exists, analyze it and add to text
-    if (foundItem.image_url) {
-      console.log('🖼️ Found item has image, analyzing...');
-      const imageAnalysis = await analyzeImage(foundItem.image_url);
-      if (imageAnalysis) {
-        foundText = `${foundText} ${imageAnalysis}`;
-        console.log('✅ Enhanced description with image analysis');
-      }
-    }
-    
-    console.log('🤖 Found item text:', foundText);
-    
-    // Get embedding for found item
-    console.log('🤖 Getting embedding for found item...');
-    const foundEmbedding = await getEmbedding(foundText);
-    console.log('✅ Found item embedding generated');
-    
-    // Get all active lost items from database
-    console.log('🤖 Fetching lost items from database...');
-    const { data: lostItems, error } = await supabase
-      .from('lost_found_items')
-      .select('*')
-      .eq('type', 'lost')
-      .eq('status', 'active');
-    
-    if (error) {
-      console.error('❌ Database error:', error);
-      throw error;
-    }
-    
-    if (!lostItems || lostItems.length === 0) {
-      console.log('🤖 No lost items in database to match against');
-      return [];
-    }
-    
-    console.log(`🤖 Comparing against ${lostItems.length} lost items...`);
-    
-    // Find matches
-    const matches = [];
-    for (let i = 0; i < lostItems.length; i++) {
-      const lostItem = lostItems[i];
-      console.log(`🤖 Checking lost item ${i + 1}/${lostItems.length}: "${lostItem.title}"`);
-      
-      // Create text for lost item
-      let lostText = `${lostItem.title} ${lostItem.description} ${lostItem.location || ''}`;
-      
-      // If lost item has image, analyze it too
-      if (lostItem.image_url) {
-        console.log('   🖼️ Lost item has image, analyzing...');
-        const imageAnalysis = await analyzeImage(lostItem.image_url);
-        if (imageAnalysis) {
-          lostText = `${lostText} ${imageAnalysis}`;
-          console.log('   ✅ Enhanced lost item with image analysis');
-        }
-      }
-      
-      // Get embedding for lost item
-      const lostEmbedding = await getEmbedding(lostText);
-      
-      // Calculate similarity
-      const similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
-      console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
-      
-      // If similarity > 70%, it's a potential match
-      if (similarity > 0.70) {
-        //Determine confidence level
-        let confidence = 'Good';
-        if (similarity > 0.85){
-          confidence = 'Very High';
-        } else if (similarity > 0.80) {
-          confidence = 'High';
-        }
-        console.log(`   ✅ MATCH FOUND! (${(similarity * 100).toFixed(1)}%)`);
-
-        matches.push({
-          item: lostItem,
-          score: similarity,
-          confidence: confidence,
-        });
-      }
-    }
-    
-    // Sort by best match first
-    matches.sort((a, b) => b.score - a.score);
-    
-    console.log(`🎉 AI matching complete! Found ${matches.length} potential matches`);
-    return matches;
-
-  } catch (error) {
-    console.error('❌ AI matching error:', error);
-    return [];
-  }
+  void foundItem;
+  throw new Error('Client-side matching is disabled. Use /api/match-items.');
 }
 
 // Send email notifications to matched users

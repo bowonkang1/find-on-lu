@@ -127,7 +127,7 @@ async function findMatchingLostItems(foundItem) {
     const MAX_COMPARISONS = 50;
     const MAX_MATCHES_TO_NOTIFY = 3;
 
-    const { data: lostItems, error } = await supabase
+    const { data: lostItems, error } = await foundItem.supabaseClient
       .from("lost_found_items")
       .select("*")
       .eq("type", "lost")
@@ -337,19 +337,52 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { foundItem } = req.body;
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
-  if (!foundItem) {
-    return res.status(400).json({ error: "Missing foundItem data" });
+  if (!token) {
+    return res.status(401).json({ error: "Missing authentication token" });
   }
 
-  try {
+  try { //tries to get the user from the authentication token
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !authData?.user) {
+      return res.status(401).json({ error: "Invalid or expired authentication token" });
+    }
+
+    const authedSupabase = createClient( //creates a new Supabase client with the authentication token
+      process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+
+    const { foundItem } = req.body;
+    if (!foundItem) {
+      return res.status(400).json({ error: "Missing foundItem data" });
+    }
+
+    const safeFoundItem = {
+      title: foundItem.title,
+      description: foundItem.description,
+      location: foundItem.location,
+      image_url: foundItem.image_url,
+      // Always trust authenticated user identity over client payload.
+      user_email: authData.user.email || "",
+      supabaseClient: authedSupabase,
+    };
+
     console.log("🚀 Background job started for:", foundItem.title);
 
-    const matches = await findMatchingLostItems(foundItem);
+    const matches = await findMatchingLostItems(safeFoundItem);
 
     if (matches.length > 0) {
-      await notifyMatchedUsers(matches, foundItem);
+      await notifyMatchedUsers(matches, safeFoundItem);
     }
 
     return res.status(200).json({

@@ -171,18 +171,26 @@ export function PostItemModal({
             data: { user },
           } = await supabase.auth.getUser();
 
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession();
+          const accessToken = currentSession?.access_token;
+
           // Trigger background job (don't wait for it)
           fetch("/api/match-items", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              ...(accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : {}),
             },
             body: JSON.stringify({
               foundItem: {
                 title: formData.title,
                 description: formData.description,
                 location: formData.location,
-                user_email: user?.email || "",
+                user_email: user?.email || currentSession?.user?.email || "",
                 image_url: imageUrl,
               },
             }),

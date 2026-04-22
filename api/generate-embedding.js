@@ -2,19 +2,36 @@
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
-});
+//gets the server environment variables
+function getServerEnv() { 
+  const openaiApiKey =
+    process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY;
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+  const supabaseAnonKey =
+    process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
 
-const supabase = createClient(
-  process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
-);
+    //checks if the OpenAI API key is present
+  if (!openaiApiKey) {
+    throw new Error("Missing OPENAI_API_KEY in server environment");
+  }
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in server environment");
+  }
+
+  return { openaiApiKey, supabaseUrl, supabaseAnonKey };
+}
+//creates a new Supabse client
+function createServerSupabase() {
+  const { supabaseUrl, supabaseAnonKey } = getServerEnv();
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
 
 function createAuthedSupabase(token) {
+  const { supabaseUrl, supabaseAnonKey } = getServerEnv();
   return createClient(
-    process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       global: {
         headers: {
@@ -54,6 +71,8 @@ function isRateLimited(ip) {
 
 async function getEmbedding(text) {
   try {
+    const { openaiApiKey } = getServerEnv();
+    const openai = new OpenAI({ apiKey: openaiApiKey });
     const response = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: text,
@@ -72,6 +91,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    const supabase = createServerSupabase();
     const ip = getClientIp(req);
     if (isRateLimited(ip)) {
       return res.status(429).json({ error: "Too many requests. Try again shortly." });
@@ -128,9 +148,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Error:', error);
+    const details = error instanceof Error ? error.message : "Unknown server error";
     return res.status(500).json({ 
       error: 'Failed to generate embedding',
-      details: error.message 
+      details
     });
   }
 }

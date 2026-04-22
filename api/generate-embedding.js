@@ -11,6 +11,20 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY
 );
 
+function createAuthedSupabase(token) {
+  return createClient(
+    process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    }
+  );
+}
+
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 10;
 const requestLog = new Map();
@@ -94,7 +108,8 @@ export default async function handler(req, res) {
     console.log('✅ Embedding generated, saving to database...');
 
     // DB에 저장
-    const { error: updateError } = await supabase
+    const authedSupabase = createAuthedSupabase(token);
+    const { error: updateError } = await authedSupabase
       .from('lost_found_items')
       .update({ embedding: embedding })
       .eq('id', itemId);

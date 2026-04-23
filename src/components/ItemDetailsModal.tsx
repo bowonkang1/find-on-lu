@@ -130,10 +130,6 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
             <p className="font-medium">{displayDate}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Posted</p>
-            <p className="font-medium">{displayDate}</p>
-          </div>
-          <div>
             <p className="text-sm text-gray-500">
               {item.price !== undefined ? "Seller" : "Posted by"}
             </p>

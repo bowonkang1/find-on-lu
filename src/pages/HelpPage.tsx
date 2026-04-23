@@ -16,7 +16,7 @@ export function HelpPage() {
       {/* Quick Start */}
       <section className="mb-10 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl">
         <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <span className="mr-2"></span>Quick Start
+          <span className="mr-2"></span>⭐️Quick Start
         </h2>
         <div className="space-y-2 text-gray-700">
           <p><strong>Lost something?</strong> Post it → You may get AI match emails → Mark as Reunited when found</p>
@@ -28,7 +28,7 @@ export function HelpPage() {
       {/* Install as an App */}
       <section className="mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-bold mb-4 flex items-center">
-          <span className="mr-2"></span>Install as an App
+          <span className="mr-2"></span> 🧚🏼‍♂️Install as an App
         </h2>
         <p className="text-gray-700 mb-4">Use Find On LU like a real app!</p>
         <p className="text-sm text-gray-600 mb-4">
@@ -108,14 +108,6 @@ export function HelpPage() {
             <li>• Verify details before meeting</li>
             <li>• AI suggests matches - you confirm they're correct</li>
           </ul>
-        </div>
-        
-        <div className="bg-purple-50 p-4 rounded-lg">
-          <p className="font-semibold text-sm mb-1">Privacy:</p>
-          <p className="text-sm text-gray-700">
-            Listings show a short poster name (the part before @ in your Lawrence email), not your full address on the card.
-            Match-related emails may go to people involved when the system finds a plausible link—treat those as hints and verify in person.
-          </p>
         </div>
       </section>
 

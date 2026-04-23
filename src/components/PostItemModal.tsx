@@ -187,6 +187,8 @@ export function PostItemModal({
             },
             body: JSON.stringify({
               foundItem: {
+                id: savedItem.id,
+                created_at: savedItem.created_at,
                 title: formData.title,
                 description: formData.description,
                 location: formData.location,

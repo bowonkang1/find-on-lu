@@ -364,6 +364,13 @@ async function notifyMatchedUsers(matches, foundItem) {
     try {
       const matchPercent = Math.round(match.score * 100);
       const confidence = match.confidence || "Good";
+      const supportEmail = process.env.SUPPORT_EMAIL || "support@findonlu.com";
+      const foundAt = foundItem.created_at
+        ? new Date(foundItem.created_at).toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })
+        : "Not available";
 
       console.log(
         `📧 Sending email to ${match.item.user_email} (${matchPercent}% match - ${confidence} confidence)`
@@ -398,6 +405,14 @@ async function notifyMatchedUsers(matches, foundItem) {
       const appUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}/lost-found`
         : "http://localhost:3000/lost-found";
+      const matchUrl = foundItem.id
+        ? `${appUrl}?matchItemId=${encodeURIComponent(foundItem.id)}`
+        : appUrl;
+      const thumbnailHtml = foundItem.image_url
+        ? `<div style="margin: 20px 0; text-align: center;">
+    <img src="${foundItem.image_url}" alt="Found item thumbnail" style="max-width: 220px; width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;" />
+  </div>`
+        : "";
 
       const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -406,9 +421,15 @@ async function notifyMatchedUsers(matches, foundItem) {
       <p style="line-height: 1.6; color: #333;">
     ${description.replace(/\n/g, "<br>")}
      </p>
+
+  <p style="line-height: 1.6; color: #333; margin: 10px 0 0 0;">
+    <strong>Found At:</strong> ${foundAt}
+  </p>
+
+  ${thumbnailHtml}
   
   <div style="margin: 30px 0; text-align: center;">
-    <a href="${appUrl}" 
+    <a href="${matchUrl}" 
        style="background-color: #003f87; 
               color: white; 
               padding: 14px 32px; 
@@ -417,17 +438,22 @@ async function notifyMatchedUsers(matches, foundItem) {
               display: inline-block;
               font-weight: bold;
               font-size: 16px;">
-      View on Find On LU
+      View Match
     </a>
   </div>
+
+  <p style="color: #7c2d12; background-color: #ffedd5; border: 1px solid #fed7aa; border-radius: 8px; padding: 10px 12px; font-size: 13px;">
+    AI suggestion only: this is a potential match and may be incorrect. Please verify details before making contact.
+  </p>
   
   <p style="color: #666; font-size: 14px; text-align: center; margin-top: 30px;">
-    Or visit: <a href="${appUrl}" style="color: #003f87;">${appUrl}</a>
+    Or visit: <a href="${matchUrl}" style="color: #003f87;">${matchUrl}</a>
   </p>
   
   <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
   
   <p style="color: #999; font-size: 12px; text-align: center;">
+    Do not reply to this message. For support, contact <a href="mailto:${supportEmail}" style="color: #003f87;">${supportEmail}</a>.<br><br>
     This is an automated message from Find On LU<br>
     Lawrence University Lost & Found Platform
   </p>
@@ -492,6 +518,8 @@ export default async function handler(req, res) {
     }
 
     const safeFoundItem = {
+      id: foundItem.id,
+      created_at: foundItem.created_at,
       title: foundItem.title,
       description: foundItem.description,
       location: foundItem.location,

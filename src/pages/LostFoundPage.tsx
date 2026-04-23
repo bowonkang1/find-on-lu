@@ -33,6 +33,23 @@ export function LostFoundPage() {
     loadItems();
   }, []);
 
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const matchItemId = params.get("matchItemId");
+    if (!matchItemId) return;
+
+    const matchedItem = items.find((item) => item.id === matchItemId);
+    if (!matchedItem) return;
+
+    setSelectedItem(matchedItem);
+
+    // Clean URL after opening the modal so refresh/share remains predictable.
+    const nextUrl = `${window.location.pathname}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", nextUrl);
+  }, [items]);
+
   async function loadItems() {
     try {
       console.log("🔄 Loading items from Supabase...");

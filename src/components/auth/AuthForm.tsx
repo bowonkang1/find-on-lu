@@ -8,7 +8,6 @@ const SCHOOL_DOMAIN = "@lawrence.edu";
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
-  //True->sign in, False->Sign up
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,27 +23,46 @@ export function AuthForm() {
     return "";
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleForgotPassword = async () => {
     setError("");
     setMessage("");
 
-    
-
-    // Validate school email
     const emailError = validateEmail(email);
     if (emailError) {
       setError(emailError);
       return;
     }
 
-    // Validate password
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      setMessage("If this account exists, we sent a reset link.");
+    } catch (err: any) {
+      setError(err.message || "Couldn't send reset email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
 
-    // Check password match for sign up
     if (!isLogin && password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -54,7 +72,6 @@ export function AuthForm() {
 
     try {
       if (isLogin) {
-        // Sign In
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -62,7 +79,6 @@ export function AuthForm() {
         if (error) throw error;
         navigate('/dashboard');
       } else {
-        // Sign Up
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -163,8 +179,22 @@ export function AuthForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={isLogin ? "Your password" : "Minimum 6 characters"}
+          autoComplete={isLogin ? "current-password" : "new-password"}
           required
         />
+
+        {isLogin && (
+          <div className="text-right -mt-2">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={loading}
+              className="text-sm text-lu-blue-600 hover:text-lu-blue-700 disabled:text-gray-400"
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
 
         {!isLogin && (
           <Input
@@ -173,6 +203,7 @@ export function AuthForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Re-enter your password"
+            autoComplete="new-password"
             required
           />
         )}

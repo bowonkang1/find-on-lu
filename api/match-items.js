@@ -477,7 +477,7 @@ async function notifyMatchedUsers(matches, foundItem) {
       if (error) {
         console.error("❌ Resend error:", error);
       } else {
-        console.log("✅ Email sent successfully:0", data);
+        console.log("✅ Email sent successfully:", data);
       }
     } catch (error) {
       console.error(`❌ Failed to notify ${match.item.user_email}:`, error);
@@ -501,7 +501,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Missing authentication token" });
   }
 
-  try { //tries to get the user from the authentication token
+  try {
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !authData?.user) {
       return res.status(401).json({ error: "Invalid or expired authentication token" });

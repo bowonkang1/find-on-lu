@@ -17,6 +17,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // ==================== HELPER FUNCTIONS ====================
 
 function extractColor(text) {
+  if (typeof text !== "string" || text.trim().length === 0) {
+    return null;
+  }
+
   const colors = [
     "red",
     "blue",
@@ -41,11 +45,26 @@ function extractColor(text) {
   const lowerText = text.toLowerCase();
 
   for (const color of colors) {
-    if (lowerText.includes(color)) {
+    // Match whole words only to avoid false positives like "tapered" -> "red".
+    const wordPattern = new RegExp(`\\b${color}\\b`, "i");
+    if (wordPattern.test(lowerText)) {
       return color;
     }
   }
   return null;
+}
+
+function extractPrimaryColorFromAnalysis(analysisText) {
+  if (typeof analysisText !== "string" || analysisText.trim().length === 0) {
+    return null;
+  }
+
+  const primaryLine = analysisText
+    .split("\n")
+    .find((line) => /primary color/i.test(line));
+
+  if (!primaryLine) return null;
+  return extractColor(primaryLine);
 }
 
 function normalizeColor(color) {
@@ -225,9 +244,11 @@ async function findMatchingLostItems(foundItem) {
 
     const matches = [];
 
-    const foundColor = normalizeColor(
-      extractColor(`${foundItem.title} ${foundItem.description} ${foundImageAnalysis}`)
+    const foundTextColor = extractColor(
+      `${foundItem.title} ${foundItem.description}`
     );
+    const foundImageColor = extractPrimaryColorFromAnalysis(foundImageAnalysis);
+    const foundColor = normalizeColor(foundTextColor || foundImageColor);
     if (foundColor) {
       console.log(`🎨 Found item color detected: ${foundColor}`);
     }

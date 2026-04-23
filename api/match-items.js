@@ -385,22 +385,15 @@ async function notifyMatchedUsers(matches, foundItem) {
         subject = `🔍 Good Match (${matchPercent}%): Check if this matches your item`;
       }
 
-      let description = `Someone found an item that matches your lost "${match.item.title}"!\n\n`;
-      description += `Match Confidence: ${confidence} (${matchPercent}%)\n\n`;
-
+      let confidenceMessage = "";
       if (confidence === "Very High") {
-        description += `This is a very strong match! `;
+        confidenceMessage = "This is a very strong match!";
       } else if (confidence === "High") {
-        description += `This looks like a good match. `;
+        confidenceMessage = "This looks like a good match.";
       } else {
-        description += `This might be your item - please verify the details carefully. `;
+        confidenceMessage =
+          "This might be your item - please verify the details carefully.";
       }
-
-      description += `\n\nFound Item Details:\n`;
-      description += `- Title: ${foundItem.title}\n`;
-      description += `- Description: ${foundItem.description}\n`;
-      description += `- Location: ${foundItem.location || "Not specified"}\n\n`;
-      description += `Please check the details carefully to confirm if this is your item.`;
 
       const appUrl = process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}/lost-found`
@@ -413,9 +406,30 @@ async function notifyMatchedUsers(matches, foundItem) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #003f87; margin-bottom: 20px;">🎯 Item Match Found!</h2>
   
-      <p style="line-height: 1.6; color: #333;">
-    ${description.replace(/\n/g, "<br>")}
-     </p>
+      <p style="line-height: 1.6; color: #333; margin: 0 0 12px 0;">
+        Someone found an item that matches your lost "<strong>${match.item.title}</strong>"!
+      </p>
+
+      <p style="line-height: 1.6; color: #333; margin: 0 0 12px 0;">
+        <strong>Match Confidence:</strong> ${confidence} (${matchPercent}%)
+      </p>
+
+      <p style="line-height: 1.6; color: #333; margin: 0 0 12px 0;">
+        ${confidenceMessage}
+      </p>
+
+      <div style="line-height: 1.6; color: #333; margin: 0 0 12px 0;">
+        <p style="margin: 0 0 8px 0;"><strong>Found Item Details:</strong></p>
+        <ul style="margin: 0; padding-left: 18px;">
+          <li><strong>Title:</strong> ${foundItem.title}</li>
+          <li><strong>Description:</strong> ${foundItem.description}</li>
+          <li><strong>Location:</strong> ${foundItem.location || "Not specified"}</li>
+        </ul>
+      </div>
+
+      <p style="line-height: 1.6; color: #333; margin: 0 0 12px 0;">
+        Please check the details carefully to confirm if this is your item.
+      </p>
 
   <p style="line-height: 1.6; color: #333; margin: 10px 0 0 0;">
     <strong>Found At:</strong> ${foundAt}

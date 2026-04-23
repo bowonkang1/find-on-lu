@@ -98,10 +98,53 @@ async function analyzeImage(imageUrl) {
 }
 
 function cosineSimilarity(a, b) {
+  if (//checks if the embeddings are arrays and have the same length and are not empty
+    !Array.isArray(a) ||
+    !Array.isArray(b) ||
+    a.length === 0 ||
+    b.length === 0 ||
+    a.length !== b.length 
+  ) {
+    return 0;
+  }
+
   const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0);
   const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
   const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+  if (magnitudeA === 0 || magnitudeB === 0) return 0;
+
   return dotProduct / (magnitudeA * magnitudeB);
+}
+
+function normalizeEmbedding(rawEmbedding) { //normalizes the embedding by converting it to an array of numbers and filtering out any non-finite values
+  if (Array.isArray(rawEmbedding)) {
+    const nums = rawEmbedding.map(Number).filter(Number.isFinite);
+    return nums.length > 0 ? nums : null;
+  }
+
+  if (typeof rawEmbedding === "string") { //if the embedding is a string, it is parsed as a JSON object
+    try {
+      const parsed = JSON.parse(rawEmbedding);
+      if (Array.isArray(parsed)) {
+        const nums = parsed.map(Number).filter(Number.isFinite);
+        return nums.length > 0 ? nums : null;
+      }
+    } catch (_error) {
+      // Continue to pgvector string parsing fallback.
+    }
+
+    const trimmed = rawEmbedding.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      const nums = trimmed
+        .slice(1, -1)
+        .split(",")
+        .map((value) => Number(value.trim()))
+        .filter(Number.isFinite);
+      return nums.length > 0 ? nums : null;
+    }
+  }
+
+  return null;
 }
 
 async function findMatchingLostItems(foundItem) {
@@ -119,7 +162,10 @@ async function findMatchingLostItems(foundItem) {
     }
 
     console.log("🤖 Generating found item embedding...");
-    const foundEmbedding = await getEmbedding(foundText);
+    const foundEmbedding = normalizeEmbedding(await getEmbedding(foundText));
+    if (!foundEmbedding) {
+      throw new Error("Invalid found-item embedding format");
+    }
     console.log("✅ Found item embedding generated");
 
     console.log("🤖 Fetching lost items with embeddings from database...");
@@ -173,7 +219,20 @@ async function findMatchingLostItems(foundItem) {
         `🤖 Checking lost item ${comparisonCount}/${lostItems.length}: "${lostItem.title}"`
       );
 
-      const lostEmbedding = lostItem.embedding;
+      const lostEmbedding = normalizeEmbedding(lostItem.embedding); //normalizes the lost item embeddinng
+      if (!lostEmbedding) {
+        console.warn(
+          `⚠️ Skipping lost item with invalid embedding format: ${lostItem.id}`
+        );
+        continue;
+      }
+
+      if (lostEmbedding.length !== foundEmbedding.length) {
+        console.warn(
+          `⚠️ Skipping lost item with embedding dimension mismatch: ${lostItem.id}`
+        );
+        continue;
+      }
 
       let similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
 

@@ -435,7 +435,7 @@ async function notifyMatchedUsers(matches, foundItem) {
 `;
 
       const { data, error } = await resend.emails.send({
-        from: "Find On LU <onboarding@resend.dev>",
+        from: `Find On LU <${process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"}>`,
         to: [match.item.user_email],
         subject: subject,
         html: htmlBody,

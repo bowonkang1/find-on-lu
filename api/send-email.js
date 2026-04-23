@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Find On LU <onboarding@resend.dev>',
+      from: `Find On LU <${process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"}>`,
       to: to,
       subject: subject,
       html: html,

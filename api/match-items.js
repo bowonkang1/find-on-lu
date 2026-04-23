@@ -48,6 +48,23 @@ function extractColor(text) {
   return null;
 }
 
+function normalizeColor(color) {
+  if (!color) return null;
+
+  const groups = {
+    blue: ["blue", "navy", "teal"],
+    red: ["red", "maroon"],
+    gray: ["gray", "grey", "silver"],
+    brown: ["brown", "beige"],
+  };
+
+  for (const [normalized, variants] of Object.entries(groups)) {
+    if (variants.includes(color)) return normalized;
+  }
+
+  return color;
+}
+
 // ==================== AI FUNCTIONS ====================
 
 async function getEmbedding(text) {
@@ -151,22 +168,32 @@ async function findMatchingLostItems(foundItem) {
   try {
     console.log("🤖 AI: Starting matching for found item...");
 
-    let foundText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
+    const foundBaseText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
+    let foundImageAnalysis = "";
+    let foundImageEmbedding = null;
 
-    if (foundItem.image_url) {
-      console.log("🖼️ Analyzing found item image...");
-      const imageAnalysis = await analyzeImage(foundItem.image_url);
-      if (imageAnalysis) {
-        foundText = `${foundText} ${imageAnalysis}`;
-      }
-    }
-
-    console.log("🤖 Generating found item embedding...");
-    const foundEmbedding = normalizeEmbedding(await getEmbedding(foundText));
-    if (!foundEmbedding) {
+    console.log("🤖 Generating base found-item embedding...");
+    const foundBaseEmbedding = normalizeEmbedding(await getEmbedding(foundBaseText));
+    if (!foundBaseEmbedding) {
       throw new Error("Invalid found-item embedding format");
     }
-    console.log("✅ Found item embedding generated");
+    console.log("✅ Base found-item embedding generated");
+
+    // Use image analysis as a weighted signal (not a full replacement)
+    // so that image context improves accuracy without overpowering text similarity.
+    if (foundItem.image_url) {
+      console.log("🖼️ Analyzing found item image for supplemental signal...");
+      foundImageAnalysis = await analyzeImage(foundItem.image_url);
+      if (foundImageAnalysis) {
+        const foundImageText = `${foundBaseText} ${foundImageAnalysis}`;
+        foundImageEmbedding = normalizeEmbedding(await getEmbedding(foundImageText));
+        if (foundImageEmbedding) {
+          console.log("✅ Image-augmented found-item embedding generated");
+        } else {
+          console.warn("⚠️ Skipping image signal due to invalid embedding format");
+        }
+      }
+    }
 
     console.log("🤖 Fetching lost items with embeddings from database...");
 
@@ -198,8 +225,8 @@ async function findMatchingLostItems(foundItem) {
 
     const matches = [];
 
-    const foundColor = extractColor(
-      `${foundItem.title} ${foundItem.description}`
+    const foundColor = normalizeColor(
+      extractColor(`${foundItem.title} ${foundItem.description} ${foundImageAnalysis}`)
     );
     if (foundColor) {
       console.log(`🎨 Found item color detected: ${foundColor}`);
@@ -227,26 +254,43 @@ async function findMatchingLostItems(foundItem) {
         continue;
       }
 
-      if (lostEmbedding.length !== foundEmbedding.length) {
+      if (lostEmbedding.length !== foundBaseEmbedding.length) {
         console.warn(
           `⚠️ Skipping lost item with embedding dimension mismatch: ${lostItem.id}`
         );
         continue;
       }
 
-      let similarity = cosineSimilarity(foundEmbedding, lostEmbedding);
+      const baseSimilarity = cosineSimilarity(foundBaseEmbedding, lostEmbedding);
+      let similarity = baseSimilarity;
+      let imageSimilarity = null;
 
-      const lostColor = extractColor(
-        `${lostItem.title} ${lostItem.description}`
+      if (
+        foundImageEmbedding &&
+        foundImageEmbedding.length === lostEmbedding.length
+      ) {
+        imageSimilarity = cosineSimilarity(foundImageEmbedding, lostEmbedding);
+        // Weighted blend: text remains primary, image signal nudges confidence.
+        similarity = baseSimilarity * 0.8 + imageSimilarity * 0.2;
+      }
+
+      const lostColor = normalizeColor(
+        extractColor(`${lostItem.title} ${lostItem.description}`)
       );
       if (foundColor && lostColor && foundColor !== lostColor) {
         console.log(
-          `   ⚠️ Color mismatch: ${foundColor} vs ${lostColor} - applying 50% penalty`
+          `   ⚠️ Color mismatch: ${foundColor} vs ${lostColor} - applying 20% penalty`
         );
-        similarity = similarity * 0.5;
+        similarity = similarity * 0.8;
       }
 
-      console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
+      if (imageSimilarity !== null) {
+        console.log(
+          `   Similarity: ${(similarity * 100).toFixed(1)}% (text ${(baseSimilarity * 100).toFixed(1)}%, image ${(imageSimilarity * 100).toFixed(1)}%)`
+        );
+      } else {
+        console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
+      }
 
       if (similarity > 0.7) {
         let confidence = "Good";
@@ -379,7 +423,7 @@ async function notifyMatchedUsers(matches, foundItem) {
       if (error) {
         console.error("❌ Resend error:", error);
       } else {
-        console.log("✅ Email sent successfully:", data);
+        console.log("✅ Email sent successfully:0", data);
       }
     } catch (error) {
       console.error(`❌ Failed to notify ${match.item.user_email}:`, error);

@@ -408,11 +408,6 @@ async function notifyMatchedUsers(matches, foundItem) {
       const matchUrl = foundItem.id
         ? `${appUrl}?matchItemId=${encodeURIComponent(foundItem.id)}`
         : appUrl;
-      const thumbnailHtml = foundItem.image_url
-        ? `<div style="margin: 20px 0; text-align: center;">
-    <img src="${foundItem.image_url}" alt="Found item thumbnail" style="max-width: 220px; width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;" />
-  </div>`
-        : "";
 
       const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -425,8 +420,6 @@ async function notifyMatchedUsers(matches, foundItem) {
   <p style="line-height: 1.6; color: #333; margin: 10px 0 0 0;">
     <strong>Found At:</strong> ${foundAt}
   </p>
-
-  ${thumbnailHtml}
   
   <div style="margin: 30px 0; text-align: center;">
     <a href="${matchUrl}" 

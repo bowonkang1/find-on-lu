@@ -9,6 +9,7 @@ import { LostFoundPage } from './pages/LostFoundPage';
 import { ThriftPage } from './pages/ThriftPage';
 import { MyPostsPage } from './pages/MyPostsPage';
 import { HelpPage } from './pages/HelpPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
 
 // Imports all the components the app needs to assemble the application
@@ -77,6 +78,7 @@ function App() {
               <AuthForm />
             </div>
           } />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
@@ -93,6 +95,7 @@ function App() {
           <Route path="/thrift" element={<ThriftPage />} />
           <Route path="/my-posts" element={<MyPostsPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>

@@ -3,6 +3,7 @@ import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
 import { getThriftItems } from "../lib/supabaseService";
+import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface ThriftItem {
   id: string; // uuid in Supabase
@@ -215,12 +216,7 @@ export function ThriftPage() {
                 const posterName = item.user_email.split("@")[0];
                 const subject = `Interested in: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`;
-                const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${
-                  item.user_email
-                }&subject=${encodeURIComponent(
-                  subject
-                )}&body=${encodeURIComponent(body)}`;
-                window.open(outlookUrl, "_blank");
+                openPrefilledEmail(item.user_email, subject, body);
               }}
             >
               Contact Seller

@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "./ui/Button";
+import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface ItemDetailsModalProps {
   item: {
@@ -162,12 +163,7 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;
             }
 
-            const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${
-              item.user_email
-            }&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-              body
-            )}`;
-            window.open(outlookUrl, "_blank");
+            openPrefilledEmail(item.user_email, subject, body);
           }}
         >
           Contact {item.price !== undefined ? "Seller" : "Poster"}

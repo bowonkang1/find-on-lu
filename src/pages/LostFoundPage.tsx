@@ -4,6 +4,7 @@ import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
 import { getLostFoundItems } from "../lib/supabaseService";
+import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface LostFoundItem {
   id: string;
@@ -256,12 +257,7 @@ export function LostFoundPage() {
                 const posterName = item.user_email.split("@")[0];
                 const subject = `Found your ${item.type} item: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
-                const outlookUrl = `https://outlook.office365.com/mail/deeplink/compose?to=${
-                  item.user_email
-                }&subject=${encodeURIComponent(
-                  subject
-                )}&body=${encodeURIComponent(body)}`;
-                window.open(outlookUrl, "_blank");
+                openPrefilledEmail(item.user_email, subject, body);
               }}
             >
               Contact

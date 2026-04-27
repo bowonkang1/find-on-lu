@@ -88,15 +88,15 @@ export default async function handler(req, res) {
     });
 
     if (error) {
-      console.error('❌ Resend error:', error);
+      console.error('ERROR Resend error:', error);
       return res.status(400).json({ error });
     }
 
-    console.log('✅ Email sent:', { id: data?.id, recipientCount: to.length });
+    console.log('INFO Email sent:', { id: data?.id, recipientCount: to.length });
     return res.status(200).json({ success: true, data });
     
   } catch (error) {
-    console.error('❌ Server error:', error);
+    console.error('ERROR Server error:', error);
     return res.status(500).json({ error: error.message });
   }
 }

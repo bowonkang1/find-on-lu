@@ -81,9 +81,9 @@ export function PostItemModal({
 
       // Upload image first if exists
       if (formData.image) {
-        console.log("📤 Uploading image...");
+        console.log("INFO Uploading image...");
         imageUrl = (await uploadItemImage(formData.image)) || undefined;
-        console.log("✅ Image uploaded:", imageUrl);
+        console.log("INFO Image uploaded:", imageUrl);
       }
 
       // Save item to database
@@ -109,7 +109,7 @@ export function PostItemModal({
         // Generate embedding for lost items
         if (formData.itemType === "lost") {
           try {
-            console.log("🤖 Generating embedding for lost item...");
+            console.log("INFO Generating embedding for lost item...");
 
             const itemText = `${formData.title} ${formData.description} ${formData.location}`;
             const {
@@ -131,7 +131,7 @@ export function PostItemModal({
             })
               .then(async (response) => {
                 if (response.ok) {
-                  console.log("✅ Embedding generated successfully");
+                  console.log("INFO Embedding generated successfully");
                   return;
                 }
 
@@ -150,21 +150,21 @@ export function PostItemModal({
                 );
               })
               .catch((error) => {
-                console.error("⚠️ Embedding error:", error);
+                console.error("WARN Embedding error:", error);
               });
           } catch (embError) {
-            console.error("⚠️ Embedding error:", embError);
+            console.error("WARN Embedding error:", embError);
           }
         }
       }
 
-      console.log("✅ Item saved to database:", savedItem);
+      console.log("INFO Item saved to database:", savedItem);
 
       // ============================================
       // 🤖 AI MATCHING FOR FOUND ITEMS (Background Job)
       // ============================================
       if (type === "lost-found" && formData.itemType === "found") {
-        console.log("🔍 Triggering background AI matching...");
+        console.log("INFO Triggering background AI matching...");
 
         try {
           const {
@@ -199,19 +199,19 @@ export function PostItemModal({
           })
             .then((response) => {
               if (response.ok) {
-                console.log("✅ Background matching job started");
+                console.log("INFO Background matching job started");
               } else {
-                console.error("❌ Failed to start matching job");
+                console.error("ERROR Failed to start matching job");
               }
             })
             .catch((error) => {
-              console.error("❌ Error triggering background job:", error);
+              console.error("ERROR Error triggering background job:", error);
             });
 
           //  User sees instant success - emails sent in background
           alert("Item posted successfully! AI is checking for matches...");
         } catch (error) {
-          console.error("⚠️ Failed to trigger background job:", error);
+          console.error("WARN Failed to trigger background job:", error);
           alert("Item posted successfully!");
         }
       } else {

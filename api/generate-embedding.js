@@ -80,7 +80,7 @@ async function getEmbedding(text) {
     });
     return response.data[0].embedding;
   } catch (error) {
-    console.error("❌ Embedding failed:", error);
+    console.error("ERROR Embedding failed:", error);
     throw error;
   }
 }
@@ -120,12 +120,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid itemId" });
     }
 
-    console.log(`🤖 Generating embedding for item ${itemId}...`);
+    console.log(`INFO Generating embedding for item ${itemId}`);
 
     // 임베딩 생성
     const embedding = await getEmbedding(text);
 
-    console.log('✅ Embedding generated, saving to database...');
+    console.log('INFO Embedding generated, saving to database...');
 
     // DB에 저장
     const authedSupabase = createAuthedSupabase(token);
@@ -135,11 +135,11 @@ export default async function handler(req, res) {
       .eq('id', itemId);
 
     if (updateError) {
-      console.error('❌ Database update failed:', updateError);
+      console.error('ERROR Database update failed:', updateError);
       throw updateError;
     }
 
-    console.log('✅ Embedding saved successfully');
+    console.log('INFO Embedding saved successfully');
 
     return res.status(200).json({ 
       success: true,
@@ -147,7 +147,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('ERROR Unexpected error:', error);
     const details = error instanceof Error ? error.message : "Unknown server error";
     return res.status(500).json({ 
       error: 'Failed to generate embedding',

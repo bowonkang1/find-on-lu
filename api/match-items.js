@@ -95,7 +95,7 @@ async function getEmbedding(text) {
     });
     return response.data[0].embedding;
   } catch (error) {
-    console.error("❌ Embedding failed:", error);
+    console.error("ERROR Embedding failed:", error);
     throw error;
   }
 }
@@ -125,10 +125,10 @@ async function analyzeImage(imageUrl) {
     });
 
     const aiDescription = response.choices[0].message.content || "";
-    console.log("✅ AI image analysis:", aiDescription);
+    console.log("INFO AI image analysis:", aiDescription);
     return aiDescription;
   } catch (error) {
-    console.error("❌ Image analysis failed:", error);
+    console.error("ERROR Image analysis failed:", error);
     return "";
   }
 }
@@ -185,36 +185,36 @@ function normalizeEmbedding(rawEmbedding) { //normalizes the embedding by conver
 
 async function findMatchingLostItems(foundItem) {
   try {
-    console.log("🤖 AI: Starting matching for found item...");
+    console.log("INFO Starting matching for found item");
 
     const foundBaseText = `${foundItem.title} ${foundItem.description} ${foundItem.location || ""}`;
     let foundImageAnalysis = "";
     let foundImageEmbedding = null;
 
-    console.log("🤖 Generating base found-item embedding...");
+    console.log("INFO Generating base found-item embedding");
     const foundBaseEmbedding = normalizeEmbedding(await getEmbedding(foundBaseText));
     if (!foundBaseEmbedding) {
       throw new Error("Invalid found-item embedding format");
     }
-    console.log("✅ Base found-item embedding generated");
+    console.log("INFO Base found-item embedding generated");
 
     // Use image analysis as a weighted signal (not a full replacement)
     // so that image context improves accuracy without overpowering text similarity.
     if (foundItem.image_url) {
-      console.log("🖼️ Analyzing found item image for supplemental signal...");
+      console.log("INFO Analyzing found item image for supplemental signal");
       foundImageAnalysis = await analyzeImage(foundItem.image_url);
       if (foundImageAnalysis) {
         const foundImageText = `${foundBaseText} ${foundImageAnalysis}`;
         foundImageEmbedding = normalizeEmbedding(await getEmbedding(foundImageText));
         if (foundImageEmbedding) {
-          console.log("✅ Image-augmented found-item embedding generated");
+          console.log("INFO Image-augmented found-item embedding generated");
         } else {
-          console.warn("⚠️ Skipping image signal due to invalid embedding format");
+          console.warn("WARN Skipping image signal due to invalid embedding format");
         }
       }
     }
 
-    console.log("🤖 Fetching lost items with embeddings from database...");
+    console.log("INFO Fetching lost items with embeddings from database");
 
     const MAX_COMPARISONS = 50;
     const MAX_MATCHES_TO_NOTIFY = 3;
@@ -229,12 +229,12 @@ async function findMatchingLostItems(foundItem) {
       .limit(MAX_COMPARISONS);
 
     if (error) {
-      console.error("❌ Database error:", error);
+      console.error("ERROR Database error:", error);
       throw error;
     }
 
     if (!lostItems || lostItems.length === 0) {
-      console.log("🤖 No lost items with embeddings found");
+      console.log("INFO No lost items with embeddings found");
       return [];
     }
 
@@ -341,7 +341,7 @@ async function findMatchingLostItems(foundItem) {
 
     return matches;
   } catch (error) {
-    console.error("❌ AI matching error:", error);
+    console.error("ERROR AI matching error:", error);
     return [];
   }
 }
@@ -475,16 +475,16 @@ async function notifyMatchedUsers(matches, foundItem) {
       });
 
       if (error) {
-        console.error("❌ Resend error:", error);
+        console.error("ERROR Resend error:", error);
       } else {
-        console.log("✅ Email sent successfully:", data);
+        console.log("INFO Email sent successfully:", data);
       }
     } catch (error) {
-      console.error(`❌ Failed to notify ${match.item.user_email}:`, error);
+      console.error(`ERROR Failed to notify ${match.item.user_email}:`, error);
     }
   }
 
-  console.log("📧 All notification emails sent!");
+  console.log("INFO All notification emails sent");
 }
 
 // ==================== SERVERLESS HANDLER ====================
@@ -550,7 +550,7 @@ export default async function handler(req, res) {
       message: `Found ${matches.length} potential matches`,
     });
   } catch (error) {
-    console.error("❌ Background job error:", error);
+    console.error("ERROR Background job error:", error);
     return res.status(500).json({
       error: "Matching failed",
       details: error.message,

@@ -1,4 +1,3 @@
-//Main app routing
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
@@ -11,20 +10,16 @@ import { MyPostsPage } from './pages/MyPostsPage';
 import { HelpPage } from './pages/HelpPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 
-
-// Imports all the components the app needs to assemble the application
 interface User {
   email: string;
   id: string
-} //defines what a "logged in user" looks like(email address for now)
+}
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
-  //the variable can be an object like {email: "john@lawrence.edu"} (logged in) or null(not logged in)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser({
@@ -35,7 +30,6 @@ function App() {
       setLoading(false);
     });
 
-   // Listen for auth state changes
    const { data: { subscription } } = supabase.auth.onAuthStateChange(
     (_event, session) => {
       if (session?.user) {
@@ -54,10 +48,9 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null); //user logged out and login form appears again because user is now null
+    setUser(null);
   };
 
-  // Show loading spinner
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -69,7 +62,7 @@ function App() {
     );
   }
 
-  if (!user) { //if user is not logged in , show the log in form is they can log in
+  if (!user) {
     return (
       <Router>
         <Routes>
@@ -85,7 +78,6 @@ function App() {
     );
   }
 
-  //if someone is logged in, show the main app (only runs when user is logged in)
   return (
     <Router>
       <Layout user={user} onLogout={handleLogout}>

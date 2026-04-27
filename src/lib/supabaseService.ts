@@ -1,7 +1,4 @@
-//Database operations
 import { supabase } from './supabase';
-
-//const resend = new Resend(process.env.REACT_APP_RESEND_API_KEY);
 
 // ==================== THRIFT ITEMS ====================
 
@@ -133,12 +130,10 @@ export async function deleteLostFoundItem(id: string) {
 
 export async function uploadItemImage(file: File): Promise<string | null> {
   try {
-    // Create unique filename
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `${fileName}`;
 
-    // Upload to Supabase Storage
     const { data, error } = await supabase.storage
       .from('item-images')
       .upload(filePath, file, {
@@ -148,18 +143,17 @@ export async function uploadItemImage(file: File): Promise<string | null> {
       });
 
     if (error) {
-      console.error('❌ Upload error:', error);
+      console.error('ERROR Upload error:', error);
       throw error;
     }
 
-    console.log('✅ Upload successful:', data);
+    console.log('INFO Upload successful:', data);
 
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('item-images')
       .getPublicUrl(filePath);
 
-    console.log('🔗 Public URL:', publicUrl);
+    console.log('INFO Public URL:', publicUrl);
 
     return publicUrl;
   } catch (error) {
@@ -206,8 +200,7 @@ export async function getMyLostFoundItems() {
   return data;
 }
 
-// Update Thrift Item
-export async function updateThriftItem(id: string, updates: Partial<{//partial-> all fields are optional
+export async function updateThriftItem(id: string, updates: Partial<{
   title: string;
   description: string;
   price: number;
@@ -215,18 +208,17 @@ export async function updateThriftItem(id: string, updates: Partial<{//partial->
   condition: string;
   image_url?: string;
 }>) {
-  const { data, error } = await supabase //destructuring(extracts properties from object) 
-    .from('thrift_items') //thrift_items table
-    .update(updates) //the object we passed(what to update)
-    .eq('id', id) // only update the row where id matches
-    .select() //return the updated row
-    .single(); //return as a single object
+  const { data, error } = await supabase
+    .from('thrift_items')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
 
-  if (error) throw error; // If update failed, throw error
-  return data; //If success, return the updated item
+  if (error) throw error;
+  return data;
 }
 
-// Update Lost & Found Item
 export async function updateLostFoundItem(id: string, updates: Partial<{
   title: string;
   description: string;
@@ -331,7 +323,6 @@ export async function sendNewItemNotification(params: NewItemEmailParams) {
       throw new Error('Not authenticated');
     }
 
-    // Call serverless function instead of Resend directly
     const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
@@ -345,7 +336,6 @@ export async function sendNewItemNotification(params: NewItemEmailParams) {
       }),
     });
 
-    // Check if request succeeded
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Email send error:', errorData);
@@ -353,11 +343,11 @@ export async function sendNewItemNotification(params: NewItemEmailParams) {
     }
 
     const data = await response.json();
-    console.log('✅ Email sent successfully:', data);
+    console.log('INFO Email sent successfully:', data);
     return data;
 
   } catch (error) {
-    console.error('❌ Failed to send email:', error);
+    console.error('ERROR Failed to send email:', error);
     throw error;
   }
 }
@@ -392,7 +382,7 @@ export async function getAllUserEmails(): Promise<string[]> {
 
     const uniqueEmails = Array.from(new Set(allEmails));
     
-    console.log(`📧 Found ${uniqueEmails.length} unique users`);
+    console.log(`INFO Found ${uniqueEmails.length} unique users`);
     return uniqueEmails;
   } catch (error) {
     console.error('Error getting user emails:', error);
@@ -402,8 +392,7 @@ export async function getAllUserEmails(): Promise<string[]> {
 
 // ==================== AI MATCHING FUNCTIONS ====================
 
-// Client-side OpenAI usage is intentionally disabled.
-// Matching should run through the authenticated server route: /api/match-items.
+// Client-side matching is disabled. Use /api/match-items.
 export async function findMatchingLostItems(foundItem: {
   title: string;
   description: string;
@@ -414,7 +403,6 @@ export async function findMatchingLostItems(foundItem: {
   throw new Error('Client-side matching is disabled. Use /api/match-items.');
 }
 
-// Send email notifications to matched users
 export async function notifyMatchedUsers(
   matches: any[],
   foundItem: {
@@ -425,16 +413,15 @@ export async function notifyMatchedUsers(
     image_url?: string;
   }
 ) {
-  console.log(`📧 Notifying ${matches.length} matched users...`);
+  console.log(`INFO Notifying ${matches.length} matched users`);
 
   for (const match of matches) {
     try {
       const matchPercent = Math.round(match.score * 100);
-      const confidence = match.confidence || 'Good';  //  Get confidence from match
+      const confidence = match.confidence || 'Good';
       
-      console.log(`📧 Sending email to ${match.item.user_email} (${matchPercent}% match - ${confidence} confidence)`);
+      console.log(`INFO Sending email to ${match.item.user_email} (${matchPercent}% match - ${confidence} confidence)`);
 
-      //  Create custom subject based on confidence
       let subject = '';
       if (confidence === 'Very High') {
         subject = `🎯 Very High Match (${matchPercent}%): Your lost item likely found!`;
@@ -444,7 +431,6 @@ export async function notifyMatchedUsers(
         subject = `🔍 Good Match (${matchPercent}%): Check if this matches your item`;
       }
 
-      //  Create custom description with confidence messaging
       let description = `Someone found an item that matches your lost "${match.item.title}"!\n\n`;
       description += `Match Confidence: ${confidence} (${matchPercent}%)\n\n`;
 
@@ -465,23 +451,22 @@ export async function notifyMatchedUsers(
       await sendNewItemNotification({
         to: [match.item.user_email],
         itemType: 'found',
-        itemTitle: subject,  //  Use confidence-based subject
-        itemDescription: description,  // Use confidence-based description
+        itemTitle: subject,
+        itemDescription: description,
         itemLocation: foundItem.location,
         posterEmail: foundItem.user_email,
         itemUrl: `${window.location.origin}/lost-found`,
       });
 
-      console.log(`✅ Email sent to ${match.item.user_email}`);
+      console.log(`INFO Email sent to ${match.item.user_email}`);
     } catch (error) {
-      console.error(`❌ Failed to notify ${match.item.user_email}:`, error);
+      console.error(`ERROR Failed to notify ${match.item.user_email}:`, error);
     }
   }
 
-  console.log('📧 All notification emails sent!');
+  console.log('INFO All notification emails sent');
 }
 
-// Update item status
 export async function updateItemStatus(itemId: string, status: 'active' | 'reunited') {
   const { data, error } = await supabase
     .from('lost_found_items')

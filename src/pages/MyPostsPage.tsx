@@ -78,19 +78,16 @@ export function MyPostsPage() {
     if (!editingItem) return;
 
     try {
-      // Check if it's a thrift item or lost/found item
       if ("price" in editingItem) {
-        // It's a thrift item
         await updateThriftItem(editingItem.id, updatedData);
       } else {
-        // It's a lost/found item
         await updateLostFoundItem(editingItem.id, updatedData);
       }
 
       alert("Item updated successfully!");
       setShowEditModal(false);
       setEditingItem(null);
-      loadMyPosts(); // Reload items
+      loadMyPosts();
     } catch (err) {
       alert("Failed to update item");
     }
@@ -149,7 +146,7 @@ export function MyPostsPage() {
     try {
       await updateItemStatus(itemId, "reunited");
       alert("Item marked as reunited!");
-      loadMyPosts(); // Refresh the list
+      loadMyPosts();
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to update status");
@@ -160,7 +157,7 @@ export function MyPostsPage() {
     try {
       await updateItemStatus(itemId, "active");
       alert("Item marked as active again!");
-      loadMyPosts(); // Refresh the list
+      loadMyPosts();
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to update status");
@@ -235,7 +232,6 @@ export function MyPostsPage() {
         </div>
       </div>
 
-      {/* Thrift Store Items */}
       {(sectionFilter === "all" || sectionFilter === "thrift") && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -284,7 +280,6 @@ export function MyPostsPage() {
                     Posted {new Date(item.created_at).toLocaleDateString()}
                   </div>
 
-                  {/* Edit and Delete buttons */}
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -311,7 +306,6 @@ export function MyPostsPage() {
         </div>
       )}
 
-      {/* Lost & Found Items */}
       {(sectionFilter === "all" || sectionFilter === "lostfound") && (
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -358,7 +352,7 @@ export function MyPostsPage() {
           {filteredLostFoundItems.length === 0 ? (
             <div className="bg-gray-50 rounded-lg p-8 text-center">
               <p className="text-gray-500">
-                {lostFoundFilter === "all" //
+                {lostFoundFilter === "all"
                   ? "No lost/found items posted yet"
                   : `No ${lostFoundFilter} items posted yet`}
               </p>
@@ -411,7 +405,6 @@ export function MyPostsPage() {
                     Posted {new Date(item.created_at).toLocaleDateString()}
                   </div>
 
-                  {/*  Status Badge */}
                   <div className="mb-3">
                     {item.status === "reunited" ? (
                       <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -424,9 +417,7 @@ export function MyPostsPage() {
                     )}
                   </div>
 
-                  {/*  Buttons with Status toggle */}
                   <div className="flex flex-col gap-2">
-                    {/* Status toggle button */}
                     {item.status === "active" ? (
                       <Button
                         size="sm"
@@ -447,7 +438,6 @@ export function MyPostsPage() {
                       </Button>
                     )}
 
-                    {/* Edit and Delete */}
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -477,7 +467,6 @@ export function MyPostsPage() {
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && editingItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -509,7 +498,6 @@ export function MyPostsPage() {
               </button>
             </div>
 
-            {/* Simple Edit Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -520,12 +508,10 @@ export function MyPostsPage() {
                 };
 
                 if ("price" in editingItem) {
-                  // Thrift item
                   updates.price = parseFloat(formData.get("price") as string);
                   updates.category = formData.get("category");
                   updates.condition = formData.get("condition");
                 } else {
-                  // Lost & Found item
                   updates.location = formData.get("location");
                   updates.date = formData.get("date");
                 }
@@ -534,7 +520,6 @@ export function MyPostsPage() {
               }}
               className="space-y-4"
             >
-              {/* Title */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Title
@@ -548,7 +533,6 @@ export function MyPostsPage() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -561,7 +545,6 @@ export function MyPostsPage() {
                   required
                 />
               </div>
-              {/* Description (image change)*/}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                 <p className="text-sm text-blue-800">
                   💡 <strong>Note:</strong> To change the image, delete this
@@ -569,7 +552,6 @@ export function MyPostsPage() {
                 </p>
               </div>
 
-              {/* Thrift-specific fields */}
               {"price" in editingItem && (
                 <>
                   <div>
@@ -627,7 +609,6 @@ export function MyPostsPage() {
                 </>
               )}
 
-              {/* Lost & Found specific fields */}
               {"location" in editingItem && (
                 <>
                   <div>
@@ -658,7 +639,6 @@ export function MyPostsPage() {
                 </>
               )}
 
-              {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"

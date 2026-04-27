@@ -1,4 +1,3 @@
-//Displays Lost & Found items
 import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
@@ -29,7 +28,6 @@ export function LostFoundPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  //Fetch items from supabase when page loads
   useEffect(() => {
     loadItems();
   }, []);
@@ -46,19 +44,14 @@ export function LostFoundPage() {
 
     setSelectedItem(matchedItem);
 
-    // Clean URL after opening the modal so refresh/share remains predictable.
     const nextUrl = `${window.location.pathname}${window.location.hash || ""}`;
     window.history.replaceState({}, "", nextUrl);
   }, [items]);
 
   async function loadItems() {
     try {
-      console.log("🔄 Loading items from Supabase...");
       setLoading(true);
       const data = await getLostFoundItems();
-      console.log("📦 Received from Supabase:", data);
-      console.log("📊 Item count:", data?.length);
-
       setItems(data || []);
       setError("");
     } catch (err: any) {
@@ -70,8 +63,7 @@ export function LostFoundPage() {
   }
 
   const handleItemPosted = async (newItem: any) => {
-    // After posting, reload items from database
-    console.log("handleItemPosted called!", newItem);
+    void newItem;
     await loadItems();
   };
 
@@ -83,7 +75,6 @@ export function LostFoundPage() {
     return matchesSearch && matchesFilter;
   });
 
-  // Show loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -95,7 +86,6 @@ export function LostFoundPage() {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -111,7 +101,6 @@ export function LostFoundPage() {
   }
 
   return (
-    //header
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex justify-between items-start gap-4">
@@ -149,7 +138,6 @@ export function LostFoundPage() {
                 d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-            {/*Search Section*/}
             <input
               type="text"
               placeholder="Search lost or found items..."
@@ -157,7 +145,6 @@ export function LostFoundPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lu-blue-500"
             />
-            {/*for showing the number of results*/}
             {searchTerm && (
               <p className="text-sm text-gray-600 mt-2">
                 Found {filteredItems.length} items
@@ -196,7 +183,6 @@ export function LostFoundPage() {
             key={item.id}
             className="bg-white p-6 rounded-xl shadow-lg cursor-pointer hover:shadow-2xl transition-shadow"
             onClick={() => {
-              console.log("Card clicked!", item);
               setSelectedItem(item);
             }}
           >
@@ -253,7 +239,7 @@ export function LostFoundPage() {
               size="sm"
               className="w-full"
               onClick={(e) => {
-                e.stopPropagation(); // Prevent card click when clicking button
+                e.stopPropagation();
                 const posterName = item.user_email.split("@")[0];
                 const subject = `Found your ${item.type} item: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
@@ -266,7 +252,7 @@ export function LostFoundPage() {
         ))}
       </div>
 
-      {filteredItems.length === 0 && ( // empty state
+      {filteredItems.length === 0 && (
         <div className="text-center py-16">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-gray-700 mb-2">

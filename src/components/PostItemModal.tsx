@@ -1,4 +1,3 @@
-//Handles posting Lost/Found items
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -11,12 +10,11 @@ import { supabase } from "../lib/supabase";
 import { convertHeicToJpeg, isHeicFile } from "../lib/imageConversion";
 
 interface PostItemModalProps {
-  isOpen: boolean; // Controls if modal shows or hides
-  onClose: () => void; // Function to close modal
-  type: "lost-found" | "thrift"; // Which type of form to show
-  onItemPosted?: (newItem: any) => void; // Tells parent page to reload
+  isOpen: boolean;
+  onClose: () => void;
+  type: "lost-found" | "thrift";
+  onItemPosted?: (newItem: any) => void;
 }
-//
 
 export function PostItemModal({
   isOpen,
@@ -24,11 +22,6 @@ export function PostItemModal({
   type,
   onItemPosted,
 }: PostItemModalProps) {
-  // is Open =true -> Modal shows
-  // type = "thrift" → Shows price/condition fields
-  // Has onClose function to close itself
-  // Has onItemPosted function to send data back
-
   const [loading, setLoading] = useState(false);
   const [convertingImage, setConvertingImage] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,7 +31,7 @@ export function PostItemModal({
     category: "",
     price: "",
     condition: "",
-    itemType: "lost", // for lost-found only(what page I'm on-lost page)
+    itemType: "lost",
     posterName: "",
     image: null as File | null,
   });
@@ -79,14 +72,12 @@ export function PostItemModal({
       let savedItem;
       let imageUrl: string | undefined = undefined;
 
-      // Upload image first if exists
       if (formData.image) {
         console.log("INFO Uploading image...");
         imageUrl = (await uploadItemImage(formData.image)) || undefined;
         console.log("INFO Image uploaded:", imageUrl);
       }
 
-      // Save item to database
       if (type === "thrift") {
         savedItem = await createThriftItem({
           title: formData.title,
@@ -106,7 +97,6 @@ export function PostItemModal({
           image_url: imageUrl,
         });
 
-        // Generate embedding for lost items
         if (formData.itemType === "lost") {
           try {
             console.log("INFO Generating embedding for lost item...");
@@ -160,9 +150,7 @@ export function PostItemModal({
 
       console.log("INFO Item saved to database:", savedItem);
 
-      // ============================================
-      // 🤖 AI MATCHING FOR FOUND ITEMS (Background Job)
-      // ============================================
+      // Trigger matching in the background for found items.
       if (type === "lost-found" && formData.itemType === "found") {
         console.log("INFO Triggering background AI matching...");
 
@@ -176,7 +164,6 @@ export function PostItemModal({
           } = await supabase.auth.getSession();
           const accessToken = currentSession?.access_token;
 
-          // Trigger background job (don't wait for it)
           fetch("/api/match-items", {
             method: "POST",
             headers: {
@@ -208,23 +195,19 @@ export function PostItemModal({
               console.error("ERROR Error triggering background job:", error);
             });
 
-          //  User sees instant success - emails sent in background
           alert("Item posted successfully! AI is checking for matches...");
         } catch (error) {
           console.error("WARN Failed to trigger background job:", error);
           alert("Item posted successfully!");
         }
       } else {
-        // Lost items and thrift items - just post, no emails
         alert("Item posted successfully!");
       }
 
-      // Wait for parent to reload items
       if (onItemPosted) {
         await onItemPosted(savedItem);
       }
 
-      // Reset form
       setFormData({
         title: "",
         description: "",
@@ -237,7 +220,6 @@ export function PostItemModal({
         image: null,
       });
 
-      // Close modal LAST (after everything else completes)
       onClose();
     } catch (error: any) {
       console.error("Error posting item:", error);
@@ -276,7 +258,6 @@ export function PostItemModal({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Lost/Found type selection */}
             {type === "lost-found" && (
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -339,7 +320,6 @@ export function PostItemModal({
               />
             </div>
 
-            {/* Image Upload Section */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Item Photo (Optional)
@@ -467,7 +447,6 @@ export function PostItemModal({
               </>
             )}
 
-            {/* Add these fields before the buttons section */}
             <Input
               label="Your Name"
               placeholder="Your full name"

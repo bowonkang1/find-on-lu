@@ -6,7 +6,7 @@ import { getThriftItems } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface ThriftItem {
-  id: string; // uuid in Supabase
+  id: string;
   title: string;
   description: string;
   price: number;
@@ -15,8 +15,8 @@ interface ThriftItem {
   image_url?: string;
   user_email: string;
   created_at: string;
-  status: "available" | "pending" | "sold"; // default 'available' in Supabase
-  user_id: string; // uuid in Supabase
+  status: "available" | "pending" | "sold";
+  user_id: string;
 }
 
 export function ThriftPage() {
@@ -28,7 +28,6 @@ export function ThriftPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch items from Supabase when page loads
   useEffect(() => {
     loadItems();
   }, []);
@@ -48,7 +47,7 @@ export function ThriftPage() {
   }
 
   const handleItemPosted = async (newItem: any) => {
-    // After posting, reload items from database
+    void newItem;
     await loadItems();
   };
 
@@ -61,7 +60,6 @@ export function ThriftPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Show loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -73,7 +71,6 @@ export function ThriftPage() {
     );
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">

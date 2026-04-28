@@ -485,7 +485,7 @@ export async function updateItemStatus(itemId: string, status: 'active' | 'reuni
 
 export async function updateThriftStatus(
   itemId: string,
-  status: 'available' | 'pending' | 'sold'
+  status: 'active' | 'pending' | 'sold'
 ) {
   const { data, error } = await supabase
     .from('thrift_items')

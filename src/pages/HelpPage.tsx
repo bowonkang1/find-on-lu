@@ -91,6 +91,39 @@ export function HelpPage() {
         </div>
       </section>
 
+      {/* Thrift Store */}
+      <section className="mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="text-2xl font-bold mb-4 flex items-center">
+          <span className="mr-2">🛒</span> Thrift Store
+        </h2>
+
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3">Post an Item for Sale</h3>
+          <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
+            <li>Add clear photos and set a fair price</li>
+            <li>Include condition, category, and key details</li>
+            <li>Use the Contact Seller flow to coordinate with buyers</li>
+          </ol>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg mb-3">Buying Safely</h3>
+          <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
+            <li>Read the listing details carefully before contacting</li>
+            <li>Use public campus locations for meetups</li>
+            <li>Confirm item condition in person before payment</li>
+          </ol>
+        </div>
+
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h3 className="font-semibold mb-2">After the Item Sells</h3>
+          <ul className="text-sm text-gray-700 space-y-1">
+            <li><strong>Sellers:</strong> Click "Mark as Sold" in My Posts to remove it from active listings</li>
+            <li><strong>Need to reopen it?</strong> Click "Mark as Available" to make it active again</li>
+          </ul>
+        </div>
+      </section>
+
       {/* AI Matching */}
       <section className="mb-10 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-bold mb-4 flex items-center">

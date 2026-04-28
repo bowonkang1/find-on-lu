@@ -8,6 +8,7 @@ import {
   updateThriftItem,
   updateLostFoundItem,
   updateItemStatus,
+  updateThriftStatus,
 } from "../lib/supabaseService";
 
 interface ThriftItem {
@@ -164,6 +165,30 @@ export function MyPostsPage() {
     }
   }
 
+  async function handleMarkAsSold(itemId: string) {
+    if (!confirmWhenPageActive("Mark this item as sold?")) return;
+
+    try {
+      await updateThriftStatus(itemId, "sold");
+      alert("Item marked as sold!");
+      loadMyPosts();
+    } catch (error) {
+      console.error("Error updating thrift status:", error);
+      alert("Failed to update status");
+    }
+  }
+
+  async function handleMarkAsAvailable(itemId: string) {
+    try {
+      await updateThriftStatus(itemId, "available");
+      alert("Item marked as available again!");
+      loadMyPosts();
+    } catch (error) {
+      console.error("Error updating thrift status:", error);
+      alert("Failed to update status");
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -280,24 +305,58 @@ export function MyPostsPage() {
                     Posted {new Date(item.created_at).toLocaleDateString()}
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEditThrift(item)}
-                      className="flex-1 text-blue-600 border-blue-600 hover:bg-blue-50"
-                    >
-                      Edit
-                    </Button>
+                  <div className="mb-3">
+                    {item.status === "sold" ? (
+                      <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                        ✅ Sold
+                      </span>
+                    ) : (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                        📍 Available
+                      </span>
+                    )}
+                  </div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDeleteThrift(item.id, item.title)}
-                      className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
-                    >
-                      Delete
-                    </Button>
+                  <div className="flex flex-col gap-2">
+                    {item.status === "available" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleMarkAsSold(item.id)}
+                        className="w-full text-green-600 border-green-600 hover:bg-green-50"
+                      >
+                        ✅ Mark as Sold
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleMarkAsAvailable(item.id)}
+                        className="w-full text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        📍 Mark as Available
+                      </Button>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditThrift(item)}
+                        className="flex-1 text-blue-600 border-blue-600 hover:bg-blue-50"
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDeleteThrift(item.id, item.title)}
+                        className="flex-1 text-red-600 border-red-600 hover:bg-red-50"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

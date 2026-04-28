@@ -482,3 +482,22 @@ export async function updateItemStatus(itemId: string, status: 'active' | 'reuni
 
   return data;
 }
+
+export async function updateThriftStatus(
+  itemId: string,
+  status: 'available' | 'pending' | 'sold'
+) {
+  const { data, error } = await supabase
+    .from('thrift_items')
+    .update({ status })
+    .eq('id', itemId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating thrift status:', error);
+    throw error;
+  }
+
+  return data;
+}

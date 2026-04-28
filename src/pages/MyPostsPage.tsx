@@ -180,7 +180,7 @@ export function MyPostsPage() {
 
   async function handleMarkAsAvailable(itemId: string) {
     try {
-      await updateThriftStatus(itemId, "available");
+      await updateThriftStatus(itemId, "active");
       alert("Item marked as available again!");
       loadMyPosts();
     } catch (error) {
@@ -312,13 +312,13 @@ export function MyPostsPage() {
                       </span>
                     ) : (
                       <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                        📍 Available
+                        📍 Active
                       </span>
                     )}
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    {item.status === "available" ? (
+                    {item.status === "active" ? (
                       <Button
                         size="sm"
                         variant="outline"

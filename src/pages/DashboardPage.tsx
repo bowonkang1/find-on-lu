@@ -227,7 +227,7 @@ export function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {/* Lost Items */}
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-red-600">
+              <div className="text-3xl font-bold text-blue-700">
                 {stats.lostItems}
               </div>
               <div className="text-sm text-gray-600 mt-1">Lost Items</div>
@@ -236,7 +236,7 @@ export function DashboardPage() {
 
             {/* Found Items */}
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-bold text-orange-500">
                 {stats.foundItems}
               </div>
               <div className="text-sm text-gray-600 mt-1">Found Items</div>
@@ -245,7 +245,7 @@ export function DashboardPage() {
 
             {/* Thrift Items */}
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-bold text-pink-500">
                 {stats.thriftItems}
               </div>
               <div className="text-sm text-gray-600 mt-1">Items for Sale</div>
@@ -253,7 +253,7 @@ export function DashboardPage() {
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-emerald-600">
+              <div className="text-3xl font-bold text-lime-700">
                 {stats.soldItems}
               </div>
               <div className="text-sm text-gray-600 mt-1">Items Sold</div>
@@ -261,7 +261,7 @@ export function DashboardPage() {
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-purple-600">
+              <div className="text-3xl font-bold text-violet-800">
                 {stats.itemsReunited}
               </div>
               <div className="text-sm text-gray-600 mt-1">Reunited! 🎉</div>

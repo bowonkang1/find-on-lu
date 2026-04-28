@@ -1,20 +1,16 @@
 function outlookWebComposeUrl(to: string, subject: string, body: string): string {
-  const q = new URLSearchParams({
-    to,
-    subject,
-    body,
-  });
-  return `https://outlook.office.com/mail/deeplink/compose?${q.toString()}`;
+  const encodedTo = encodeURIComponent(to);
+  const encodedSubject = encodeURIComponent(subject);
+  const encodedBody = encodeURIComponent(body);
+  return `https://outlook.office.com/mail/deeplink/compose?to=${encodedTo}&subject=${encodedSubject}&body=${encodedBody}`;
 }
 
 /** Opens Outlook mobile compose with prefilled fields (works more reliably than OWA deeplinks on phone browsers). */
 function outlookMobileAppComposeUrl(to: string, subject: string, body: string): string {
-  const q = new URLSearchParams({
-    to,
-    subject,
-    body,
-  });
-  return `ms-outlook://emails/new?${q.toString()}`;
+  const encodedTo = encodeURIComponent(to);
+  const encodedSubject = encodeURIComponent(subject);
+  const encodedBody = encodeURIComponent(body);
+  return `ms-outlook://emails/new?to=${encodedTo}&subject=${encodedSubject}&body=${encodedBody}`;
 }
 
 export function openPrefilledEmail(to: string, subject: string, body: string): void {

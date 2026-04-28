@@ -11,6 +11,7 @@ export function DashboardPage() {
     foundItems: 0, //tracks how many items were found
     thriftItems: 0, //tracks how many thrift items exist
     itemsReunited: 0, //tracks how many lost items were matched with their owners
+    soldItems: 0, //tracks how many thrift items were marked sold
     loading: true, //data is being fetched or not yet loaded
   });
   const [showWelcome, setShowWelcome] = useState(false);
@@ -54,6 +55,11 @@ export function DashboardPage() {
         .select("*", { count: "exact", head: true })
         .eq("status", "active");
 
+      const { count: soldCount } = await supabase
+        .from("thrift_items")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "sold");
+
       // Count reunited items (all time) - Lost items only
       const { count: reunitedCount } = await supabase
         .from("lost_found_items")
@@ -66,6 +72,7 @@ export function DashboardPage() {
         foundItems: foundCount || 0,
         thriftItems: thriftCount || 0,
         itemsReunited: reunitedCount || 0,
+        soldItems: soldCount || 0,
         loading: false,
       });
     } catch (error) {
@@ -205,8 +212,8 @@ export function DashboardPage() {
         </h3>
 
         {stats.loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+            {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
                 className="bg-white p-4 rounded-lg shadow animate-pulse"
@@ -217,7 +224,7 @@ export function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
             {/* Lost Items */}
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
               <div className="text-3xl font-bold text-red-600">
@@ -245,7 +252,14 @@ export function DashboardPage() {
               <div className="text-xs text-gray-400 mt-1">Available Now</div>
             </div>
 
-            {/* ✅ NEW: Items Reunited */}
+            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-3xl font-bold text-emerald-600">
+                {stats.soldItems}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">Items Sold</div>
+              <div className="text-xs text-gray-400 mt-1">All Time</div>
+            </div>
+
             <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
               <div className="text-3xl font-bold text-purple-600">
                 {stats.itemsReunited}

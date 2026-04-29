@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "./ui/Button";
+import { sendContactEmail } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface ItemDetailsModalProps {
@@ -141,7 +142,7 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
         {/* Contact Button */}
         <Button
           className="w-full"
-          onClick={() => {
+          onClick={async () => {
             const subject = item.type
               ? `About your ${item.type} item: ${item.title}`
               : `Interested in: ${item.title}`;
@@ -163,7 +164,33 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;
             }
 
-            openPrefilledEmail(item.user_email, subject, body);
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(
+              navigator.userAgent
+            );
+
+            if (!isMobile) {
+              openPrefilledEmail(item.user_email, subject, body);
+              return;
+            }
+
+            const openOutlook = window.confirm(
+              "Open Outlook with a prefilled draft?\n\nTap Cancel to send directly from the app instead."
+            );
+            if (openOutlook) {
+              openPrefilledEmail(item.user_email, subject, body);
+              return;
+            }
+
+            try {
+              await sendContactEmail({
+                to: item.user_email,
+                subject,
+                message: body,
+              });
+              alert("Message sent successfully.");
+            } catch (error: any) {
+              alert(error?.message || "Failed to send message.");
+            }
           }}
         >
           Contact {item.price !== undefined ? "Seller" : "Poster"}

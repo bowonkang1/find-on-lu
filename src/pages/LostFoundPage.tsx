@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
-import { getLostFoundItems } from "../lib/supabaseService";
+import { getLostFoundItems, sendContactEmail } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface LostFoundItem {
@@ -238,12 +238,39 @@ export function LostFoundPage() {
             <Button
               size="sm"
               className="w-full"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
                 const posterName = item.user_email.split("@")[0];
                 const subject = `Found your ${item.type} item: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
-                openPrefilledEmail(item.user_email, subject, body);
+
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(
+                  navigator.userAgent
+                );
+
+                if (!isMobile) {
+                  openPrefilledEmail(item.user_email, subject, body);
+                  return;
+                }
+
+                const openOutlook = window.confirm(
+                  "Open Outlook with a prefilled draft?\n\nTap Cancel to send directly from the app instead."
+                );
+                if (openOutlook) {
+                  openPrefilledEmail(item.user_email, subject, body);
+                  return;
+                }
+
+                try {
+                  await sendContactEmail({
+                    to: item.user_email,
+                    subject,
+                    message: body,
+                  });
+                  alert("Message sent successfully.");
+                } catch (error: any) {
+                  alert(error?.message || "Failed to send message.");
+                }
               }}
             >
               Contact

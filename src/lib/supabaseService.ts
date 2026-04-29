@@ -251,6 +251,79 @@ interface NewItemEmailParams {
   itemUrl: string;
 }
 
+interface ContactEmailParams {
+  to: string;
+  subject: string;
+  message: string;
+}
+
+//escapes HTML characters in the input string 
+function escapeHtml(input: string): string { 
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+//sends Contact messages through the API(Resend), using the current user's auth token
+export async function sendContactEmail(params: ContactEmailParams) {
+  const { to, subject, message } = params;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const accessToken = session?.access_token;
+  const senderEmail = session?.user?.email || "Unknown";
+
+  if (!accessToken) {
+    throw new Error("Not authenticated");
+  }
+
+  const safeSubject = escapeHtml(subject);
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br>");
+  const safeSender = escapeHtml(senderEmail);
+
+  //creates the HTML body of the email
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #003f87; margin-bottom: 16px;">Find On LU Contact Message</h2>
+          <p style="margin: 0 0 12px;"><strong>From:</strong> ${safeSender}</p>
+          <p style="margin: 0 0 12px;"><strong>Subject:</strong> ${safeSubject}</p>
+          <div style="margin-top: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+            ${safeMessage}
+          </div>
+          <p style="margin-top: 16px; font-size: 12px; color: #64748b;">
+            This message was sent through Find On LU.
+          </p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const response = await fetch("/api/send-email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      to: [to],
+      subject,
+      html: htmlBody,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Failed to send contact email");
+  }
+
+  return response.json();
+}
+
 export async function sendNewItemNotification(params: NewItemEmailParams) {
   const {
     to,

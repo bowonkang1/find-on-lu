@@ -154,14 +154,14 @@ export function HelpPage() {
           <div>
             <h3 className="font-semibold mb-2">Desktop:</h3>
             <p className="text-sm text-gray-700">
-              When you click "Contact" or "Contact Seller," Outlook on the web usually opens with the subject and message already filled in—review and send.
+              Contact opens Outlook with a prefilled draft so you can review and send.
             </p>
           </div>
           
           <div>
             <h3 className="font-semibold mb-2">Mobile:</h3>
             <p className="text-sm text-gray-700">
-              The Outlook mobile app opens, but you'll need to type the subject and message yourself. This is a limitation of the Outlook app, not Find On LU.
+              You can choose to open Outlook with a prefilled draft or send directly from the app if Outlook sending fails.
             </p>
           </div>
         </div>
@@ -169,7 +169,8 @@ export function HelpPage() {
         <div className="mt-4 bg-gray-50 p-4 rounded-lg">
           <p className="font-semibold text-sm mb-1">Tips:</p>
           <ul className="text-sm text-gray-700 space-y-1">
-            <li>• On desktop, Outlook usually opens with the recipient (To) already filled from the button; mobile can vary by app</li>
+            <li>• Desktop contact uses Outlook prefilled compose by default</li>
+            <li>• On mobile, pick Outlook prefilled first and use app-send as fallback if needed</li>
             <li>• Keep your messages polite and specific</li>
             <li>• Include details about the item to help verify it's yours</li>
           </ul>

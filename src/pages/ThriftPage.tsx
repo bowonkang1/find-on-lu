@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/Button";
 import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
-import { getThriftItems } from "../lib/supabaseService";
+import { getThriftItems, sendContactEmail } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
 
 interface ThriftItem {
@@ -208,12 +208,39 @@ export function ThriftPage() {
             <Button
               size="sm"
               className="w-full"
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation();
                 const posterName = item.user_email.split("@")[0];
                 const subject = `Interested in: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`;
-                openPrefilledEmail(item.user_email, subject, body);
+
+                const isMobile = /Android|iPhone|iPad|iPod/i.test(
+                  navigator.userAgent
+                );
+
+                if (!isMobile) {
+                  openPrefilledEmail(item.user_email, subject, body);
+                  return;
+                }
+
+                const openOutlook = window.confirm(
+                  "Open Outlook with a prefilled draft?\n\nTap Cancel to send directly from the app instead."
+                );
+                if (openOutlook) {
+                  openPrefilledEmail(item.user_email, subject, body);
+                  return;
+                }
+
+                try {
+                  await sendContactEmail({
+                    to: item.user_email,
+                    subject,
+                    message: body,
+                  });
+                  alert("Message sent successfully.");
+                } catch (error: any) {
+                  alert(error?.message || "Failed to send message.");
+                }
               }}
             >
               Contact Seller

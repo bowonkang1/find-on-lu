@@ -3,7 +3,7 @@
 Find On LU is a full-stack web app I built for Lawrence University students to:
 - report lost and found items
 - buy and sell secondhand items
-- contact posters quickly through prefilled email flows
+- contact posters quickly from desktop or mobile
 
 🌐 Live Demo: https://find-on-lu.vercel.app/dashboard  
 📽️ Presentation: [View Slides](./slides/find-on-lu-slides.pdf)
@@ -13,7 +13,7 @@ Find On LU is a full-stack web app I built for Lawrence University students to:
 ## Overview
 
 I started this project because students were posting in scattered places (group chats, random posts, word of mouth), which made both lost-item recovery and student selling inefficient.
-Find On LU brings those workflows together, adds AI match suggestions for lost/found, and keeps contact simple through prefilled email.
+Find On LU brings those workflows together, adds AI match suggestions for lost/found, and keeps contact simple with a hybrid flow (Outlook prefilled on desktop, fallback send on mobile).
 
 ---
 
@@ -26,7 +26,7 @@ Find On LU brings those workflows together, adds AI match suggestions for lost/f
 - Password reset flow (`/reset-password`)
 - AI-assisted matching for found items against lost items
 - Match notification emails with confidence labels
-- Prefilled contact email flow from item cards and item details
+- Hybrid contact flow (desktop prefilled compose + mobile fallback send)
 
 ---
 
@@ -89,7 +89,7 @@ Notes:
 
 ## Known Limitations
 
-- Outlook prefilled compose behavior can vary depending on mobile browser/app combinations.
+- Outlook prefilled compose can be inconsistent on some mobile app/browser combinations, so a mobile fallback send flow is included.
 - No full admin moderation dashboard yet.
 - Automated end-to-end test coverage is still limited.
 

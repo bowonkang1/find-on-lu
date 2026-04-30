@@ -224,11 +224,11 @@ export function DashboardPage() {
         </h3>
 
         {stats.loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="bg-white p-4 rounded-lg shadow animate-pulse"
+                className="bg-white p-3 sm:p-4 rounded-lg shadow animate-pulse"
               >
                 <div className="h-8 bg-gray-300 rounded mb-2"></div>
                 <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
@@ -236,48 +236,48 @@ export function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
             {/* Lost Items */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-blue-700">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-2xl sm:text-3xl font-bold text-blue-700">
                 {stats.lostItems}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Lost Items</div>
-              <div className="text-xs text-gray-400 mt-1">Currently Active</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Lost Items</div>
+              <div className="text-[11px] sm:text-xs text-gray-400 mt-1">Currently Active</div>
             </div>
 
             {/* Found Items */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-orange-500">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-2xl sm:text-3xl font-bold text-orange-500">
                 {stats.foundItems}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Found Items</div>
-              <div className="text-xs text-gray-400 mt-1">Waiting to Claim</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Found Items</div>
+              <div className="text-[11px] sm:text-xs text-gray-400 mt-1">Waiting to Claim</div>
             </div>
 
             {/* Thrift Items */}
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-pink-500">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-2xl sm:text-3xl font-bold text-pink-500">
                 {stats.thriftItems}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Items for Sale</div>
-              <div className="text-xs text-gray-400 mt-1">Available Now</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Items for Sale</div>
+              <div className="text-[11px] sm:text-xs text-gray-400 mt-1">Available Now</div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-lime-700">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-2xl sm:text-3xl font-bold text-lime-700">
                 {stats.soldItems}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Items Sold</div>
-              <div className="text-xs text-gray-400 mt-1">All Time</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Items Sold</div>
+              <div className="text-[11px] sm:text-xs text-gray-400 mt-1">All Time</div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
-              <div className="text-3xl font-bold text-violet-800">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div className="text-2xl sm:text-3xl font-bold text-violet-800">
                 {stats.itemsReunited}
               </div>
-              <div className="text-sm text-gray-600 mt-1">Reunited! 🎉</div>
-              <div className="text-xs text-gray-400 mt-1">All Time</div>
+              <div className="text-xs sm:text-sm text-gray-600 mt-1">Reunited! 🎉</div>
+              <div className="text-[11px] sm:text-xs text-gray-400 mt-1">All Time</div>
             </div>
           </div>
         )}

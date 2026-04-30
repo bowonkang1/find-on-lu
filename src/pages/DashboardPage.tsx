@@ -162,20 +162,32 @@ export function DashboardPage() {
           </div>
         </div>
       )}
-      <div className="text-center mb-8">
-        <img
-          src="/logo-lawrence.png"
-          alt="Lawrence University Logo"
-          className="h-32 w-auto mx-auto mb-4"
-        />
+      <div
+        className="mb-10 rounded-2xl overflow-hidden"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(0, 43, 91, 0.20), rgba(0, 43, 91, 0.20)), url('/campus-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 20%",
+        }}
+      >
+        <div className="text-center px-6 py-11 md:py-14 backdrop-blur-0">
+          <img
+            src="/logo-lawrence.png"
+            alt="Lawrence University Logo"
+            className="h-24 md:h-28 w-auto mx-auto mb-6 drop-shadow-md"
+          />
 
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Welcome to Find On LU
-        </h2>
+          <h2 className="text-3xl md:text-5xl font-semibold text-white mb-4 tracking-tight drop-shadow-md">
+            Welcome to Find On LU
+          </h2>
 
-        <p className="text-lg text-gray-600">
-          Your campus lost & found and marketplace platform
-        </p>
+          <div className="w-20 h-1 bg-white/80 rounded-full mx-auto mb-5"></div>
+
+          <p className="text-xl text-white/95 font-medium">
+            Your campus lost & found and marketplace platform
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">

@@ -102,7 +102,7 @@ async function getEmbedding(text) {
 
 async function analyzeImage(imageUrl) {
   try {
-    console.log(" Analyzing image:", imageUrl);
+    console.log("INFO Analyzing image:", imageUrl);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -239,7 +239,7 @@ async function findMatchingLostItems(foundItem) {
     }
 
     console.log(
-      `🤖 Comparing against ${lostItems.length} lost items (max: ${MAX_COMPARISONS})...`
+      `INFO Comparing against ${lostItems.length} lost items (max: ${MAX_COMPARISONS})`
     );
 
     const matches = [];
@@ -250,7 +250,7 @@ async function findMatchingLostItems(foundItem) {
     const foundImageColor = extractPrimaryColorFromAnalysis(foundImageAnalysis);
     const foundColor = normalizeColor(foundTextColor || foundImageColor);
     if (foundColor) {
-      console.log(`🎨 Found item color detected: ${foundColor}`);
+      console.log(`INFO Found item color detected: ${foundColor}`);
     }
 
     let comparisonCount = 0;
@@ -258,26 +258,26 @@ async function findMatchingLostItems(foundItem) {
 
     for (const lostItem of lostItems) {
       if (matchCount >= MAX_MATCHES_TO_NOTIFY) {
-        console.log(`✋ Found ${matchCount} strong matches, stopping`);
+        console.log(`INFO Found ${matchCount} strong matches; stopping`);
         break;
       }
 
       comparisonCount++;
       console.log(
-        `🤖 Checking lost item ${comparisonCount}/${lostItems.length}: "${lostItem.title}"`
+        `INFO Checking lost item ${comparisonCount}/${lostItems.length}: "${lostItem.title}"`
       );
 
       const lostEmbedding = normalizeEmbedding(lostItem.embedding); //normalizes the lost item embeddinng
       if (!lostEmbedding) {
         console.warn(
-          `⚠️ Skipping lost item with invalid embedding format: ${lostItem.id}`
+          `WARN Skipping lost item with invalid embedding format: ${lostItem.id}`
         );
         continue;
       }
 
       if (lostEmbedding.length !== foundBaseEmbedding.length) {
         console.warn(
-          `⚠️ Skipping lost item with embedding dimension mismatch: ${lostItem.id}`
+          `WARN Skipping lost item with embedding dimension mismatch: ${lostItem.id}`
         );
         continue;
       }
@@ -300,17 +300,17 @@ async function findMatchingLostItems(foundItem) {
       );
       if (foundColor && lostColor && foundColor !== lostColor) {
         console.log(
-          `   ⚠️ Color mismatch: ${foundColor} vs ${lostColor} - applying 20% penalty`
+          `WARN Color mismatch: ${foundColor} vs ${lostColor} — applying 20% penalty`
         );
         similarity = similarity * 0.8;
       }
 
       if (imageSimilarity !== null) {
         console.log(
-          `   Similarity: ${(similarity * 100).toFixed(1)}% (text ${(baseSimilarity * 100).toFixed(1)}%, image ${(imageSimilarity * 100).toFixed(1)}%)`
+          `INFO Similarity: ${(similarity * 100).toFixed(1)}% (text ${(baseSimilarity * 100).toFixed(1)}%, image ${(imageSimilarity * 100).toFixed(1)}%)`
         );
       } else {
-        console.log(`   Similarity: ${(similarity * 100).toFixed(1)}%`);
+        console.log(`INFO Similarity: ${(similarity * 100).toFixed(1)}%`);
       }
 
       if (similarity > 0.7) {
@@ -319,7 +319,7 @@ async function findMatchingLostItems(foundItem) {
         else if (similarity > 0.8) confidence = "High";
 
         console.log(
-          `   ✅ MATCH! (${(similarity * 100).toFixed(1)}%) - ${confidence} confidence`
+          `INFO Match accepted (${(similarity * 100).toFixed(1)}%), confidence: ${confidence}`
         );
 
         matchCount++;
@@ -333,10 +333,10 @@ async function findMatchingLostItems(foundItem) {
 
     matches.sort((a, b) => b.score - a.score);
     console.log(
-      `🎉 AI matching complete! Found ${matches.length} potential matches`
+      `INFO Matching complete: ${matches.length} potential matches`
     );
     console.log(
-      `📊 Compared: ${comparisonCount} items, Matched: ${matchCount} items`
+      `INFO Compared ${comparisonCount} items; matched ${matchCount}`
     );
 
     return matches;
@@ -351,12 +351,12 @@ async function notifyMatchedUsers(matches, foundItem) {
   const topMatches = matches.slice(0, MAX_MATCHES_TO_NOTIFY);
 
   console.log(
-    `📧 Notifying top ${topMatches.length} users (${matches.length} total matches)`
+    `INFO Notifying top ${topMatches.length} users (${matches.length} total matches)`
   );
 
   if (matches.length > MAX_MATCHES_TO_NOTIFY) {
     console.log(
-      `ℹ️ Skipping ${matches.length - MAX_MATCHES_TO_NOTIFY} lower-confidence matches`
+      `INFO Skipping ${matches.length - MAX_MATCHES_TO_NOTIFY} lower-confidence matches`
     );
   }
 
@@ -373,7 +373,7 @@ async function notifyMatchedUsers(matches, foundItem) {
         : "Not available";
 
       console.log(
-        `📧 Sending email to ${match.item.user_email} (${matchPercent}% match - ${confidence} confidence)`
+        `INFO Sending email to ${match.item.user_email} (${matchPercent}% match, ${confidence} confidence)`
       );
 
       let subject = "";
@@ -536,7 +536,7 @@ export default async function handler(req, res) {
       supabaseClient: authedSupabase,
     };
 
-    console.log("🚀 Background job started for:", foundItem.title);
+    console.log("INFO Background matching started for:", foundItem.title);
 
     const matches = await findMatchingLostItems(safeFoundItem);
 

@@ -88,7 +88,7 @@ export default async function handler(req, res) {
       to: to,
       subject: subject,
       html: html,
-      reply_to: replyTo,
+      replyTo: replyTo,
     });
 
     if (error) {

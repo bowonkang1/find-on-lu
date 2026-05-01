@@ -255,6 +255,7 @@ interface ContactEmailParams {
   to: string;
   subject: string;
   message: string;
+  replyTo?: string;
 }
 
 //escapes HTML characters in the input string 
@@ -269,7 +270,7 @@ function escapeHtml(input: string): string {
 
 //sends Contact messages through the API(Resend), using the current user's auth token
 export async function sendContactEmail(params: ContactEmailParams) {
-  const { to, subject, message } = params;
+  const { to, subject, message, replyTo } = params;
 
   const { data: { session } } = await supabase.auth.getSession();
   const accessToken = session?.access_token;
@@ -313,6 +314,7 @@ export async function sendContactEmail(params: ContactEmailParams) {
       to: [to],
       subject,
       html: htmlBody,
+      replyTo: replyTo || senderEmail,
     }),
   });
 

@@ -65,7 +65,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid or expired authentication token' });
     }
 
-    const { to, subject, html } = req.body;
+    const { to, subject, html, replyTo } = req.body;
     //checks if the recipient list is valid
     if (!Array.isArray(to) || to.length === 0 || to.length > MAX_RECIPIENTS) { //checks if the recipient list is valid
       return res.status(400).json({ error: 'Invalid recipient list' }); 
@@ -79,12 +79,16 @@ export default async function handler(req, res) {
     if (typeof html !== 'string' || html.trim().length === 0 || html.length > 100000) {
       return res.status(400).json({ error: 'Invalid HTML body' });
     }
+    if (replyTo !== undefined && !isValidLawrenceEmail(replyTo)) {
+      return res.status(400).json({ error: 'Invalid reply-to email' });
+    }
 
     const { data, error } = await resend.emails.send({
       from: `Find On LU <${process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"}>`,
       to: to,
       subject: subject,
       html: html,
+      reply_to: replyTo,
     });
 
     if (error) {

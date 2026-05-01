@@ -4,6 +4,7 @@ import { PostItemModal } from "../components/PostItemModal";
 import { ItemDetailsModal } from "../components/ItemDetailsModal";
 import { getThriftItems, sendContactEmail } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
+import { getMobileContactAction, isMobileDevice } from "../lib/mobileContactFlow";
 
 interface ThriftItem {
   id: string;
@@ -214,20 +215,18 @@ export function ThriftPage() {
                 const subject = `Interested in: ${item.title}`;
                 const body = `Hi ${posterName},\n\nI'm interested in your item "${item.title}" listed for $${item.price}.\n\nIs this still available?\n\nThanks!`;
 
-                const isMobile = /Android|iPhone|iPad|iPod/i.test(
-                  navigator.userAgent
-                );
-
-                if (!isMobile) {
+                if (!isMobileDevice()) {
                   openPrefilledEmail(item.user_email, subject, body);
                   return;
                 }
 
-                const openOutlook = window.confirm(
-                  "Open Outlook with a prefilled draft?\n\nTap Cancel to send directly from the app instead."
-                );
-                if (openOutlook) {
-                  openPrefilledEmail(item.user_email, subject, body);
+                const action = getMobileContactAction({
+                  to: item.user_email,
+                  subject,
+                  message: body,
+                });
+
+                if (action === "cancel") {
                   return;
                 }
 
@@ -237,7 +236,9 @@ export function ThriftPage() {
                     subject,
                     message: body,
                   });
-                  alert("Message sent successfully.");
+                  alert(
+                    `Message sent.\nTo: ${item.user_email}\nSubject: ${subject}\nReplies will go to your Lawrence email.`
+                  );
                 } catch (error: any) {
                   alert(error?.message || "Failed to send message.");
                 }

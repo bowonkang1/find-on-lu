@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "./ui/Button";
 import { sendContactEmail } from "../lib/supabaseService";
 import { openPrefilledEmail } from "../lib/openPrefilledEmail";
+import { getMobileContactAction, isMobileDevice } from "../lib/mobileContactFlow";
 
 interface ItemDetailsModalProps {
   item: {
@@ -164,20 +165,18 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;
             }
 
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(
-              navigator.userAgent
-            );
-
-            if (!isMobile) {
+            if (!isMobileDevice()) {
               openPrefilledEmail(item.user_email, subject, body);
               return;
             }
 
-            const openOutlook = window.confirm(
-              "Open Outlook with a prefilled draft?\n\nTap Cancel to send directly from the app instead."
-            );
-            if (openOutlook) {
-              openPrefilledEmail(item.user_email, subject, body);
+            const action = getMobileContactAction({
+              to: item.user_email,
+              subject,
+              message: body,
+            });
+
+            if (action === "cancel") {
               return;
             }
 
@@ -187,7 +186,9 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
                 subject,
                 message: body,
               });
-              alert("Message sent successfully.");
+              alert(
+                `Message sent.\nTo: ${item.user_email}\nSubject: ${subject}\nReplies will go to your Lawrence email.`
+              );
             } catch (error: any) {
               alert(error?.message || "Failed to send message.");
             }

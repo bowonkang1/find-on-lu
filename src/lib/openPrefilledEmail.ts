@@ -24,7 +24,22 @@ export function openPrefilledEmail(to: string, subject: string, body: string): v
 
   const outlookUrl = outlookWebComposeUrl(to, subject, body);
   const openedWindow = window.open(outlookUrl, "_blank", "noopener,noreferrer");
+
   if (!openedWindow) {
-    window.location.assign(outlookUrl);
+    const leaveSite = window.confirm(
+      "Your browser blocked the new tab.\n\n" +
+        "OK — open Outlook compose in this tab (you will leave Find On LU).\n" +
+        "Cancel — stay on Find On LU."
+    );
+    if (leaveSite) {
+      window.location.assign(outlookUrl);
+    }
+    return;
+  }
+
+  try {
+    openedWindow.opener = null;
+  } catch {
+    /* noop */
   }
 }

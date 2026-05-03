@@ -9,7 +9,8 @@ export function Button({
   children, 
   variant = 'primary', 
   size = 'md', 
-  className = '', 
+  className = '',
+  type = 'button',
   ...props 
 }: ButtonProps) {
   const baseClasses = 'font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
@@ -27,6 +28,7 @@ export function Button({
 
   return (
     <button
+      type={type}
       className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >

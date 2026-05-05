@@ -242,15 +242,21 @@ export function LostFoundPage() {
               onClick={async (e) => {
                 e.stopPropagation();
                 const posterName = item.user_email.split("@")[0];
-                const subject = `Found your ${item.type} item: ${item.title}`;
-                const body = `Hi ${posterName},\n\nI saw your ${item.type} item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
+                const subject =
+                  item.type === "lost"
+                    ? `About your lost item post: ${item.title}`
+                    : `About your found item post: ${item.title}`;
+                const body =
+                  item.type === "lost"
+                    ? `Hi ${posterName},\n\nI saw your lost item post for "${item.title}" on Find On LU.\n\nI think I may have found something that matches. Could we coordinate a quick time to connect on campus?\n\nThanks!`
+                    : `Hi ${posterName},\n\nI'm messaging about your Find On LU found post "${item.title}". I think this item might be mine, and I'd like to coordinate a quick meet-up on campus to verify.\n\nThanks!`;
 
                 if (!isMobileDevice()) {
                   openPrefilledEmail(item.user_email, subject, body);
                   return;
                 }
 
-                const action = getMobileContactAction({
+                const action = getMobileContactAction({ //
                   to: item.user_email,
                   subject,
                   message: body,

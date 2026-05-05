@@ -144,9 +144,14 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
         <Button
           className="w-full"
           onClick={async () => {
-            const subject = item.type
-              ? `About your ${item.type} item: ${item.title}`
-              : `Interested in: ${item.title}`;
+            const subject =
+              item.type === "lost"
+                ? `About your lost item post: ${item.title}`
+                : item.type === "found"
+                  ? `About your found item post: ${item.title}`
+                  : item.type
+                    ? `About your ${item.type} item: ${item.title}`
+                    : `Interested in: ${item.title}`;
 
             let body = "";
 
@@ -158,8 +163,7 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               // LOST item - someone found it and wants to return it
               body = `Hi ${posterName},\n\nI saw your lost item posting for "${item.title}" on Find On LU.\n\nI found something matching your description. Let me know when you're available and we can arrange to return it.\n\nThanks!`;
             } else if (item.type === "found") {
-              // FOUND item - someone thinks it's theirs
-              body = `Hi ${posterName},\n\nI saw your found item posting for "${item.title}" on Find On LU.\n\n${item.description}\n\nLocation: ${item.location}\n\nPlease let me know if this is still available.\n\nThanks!`;
+              body = `Hi ${posterName},\n\nI'm reaching out about your Find On LU found post "${item.title}". I think this item might be mine, and I'd like to coordinate a quick meet-up on campus to verify.\n\nThanks!`;
             } else {
               // Fallback for any other case
               body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;

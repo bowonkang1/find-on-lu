@@ -88,7 +88,9 @@ function App() {
           <Route path="/my-posts" element={<MyPostsPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>
     </Router>

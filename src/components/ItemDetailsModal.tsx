@@ -163,7 +163,7 @@ export function ItemDetailsModal({ item, onClose }: ItemDetailsModalProps) {
               // LOST item - someone found it and wants to return it
               body = `Hi ${posterName},\n\nI saw your lost item posting for "${item.title}" on Find On LU.\n\nI found something matching your description. Let me know when you're available and we can arrange to return it.\n\nThanks!`;
             } else if (item.type === "found") {
-              body = `Hi ${posterName},\n\nI'm reaching out about your Find On LU found post "${item.title}". I think this item might be mine, and I'd like to coordinate a quick meet-up on campus to verify.\n\nThanks!`;
+              body = `Hi ${posterName},\n\nAbout your Find On LU found post "${item.title}"—I may have lost it. A few details I remember (so you can compare before we meet):\n\n\n\nIf it lines up, I'm happy to meet briefly on campus in a public place. Thanks!`;
             } else {
               // Fallback for any other case
               body = `Hi ${posterName},\n\nI saw your posting for "${item.title}" on Find On LU.\n\nPlease let me know if this is still available.\n\nThanks!`;

@@ -249,7 +249,7 @@ export function LostFoundPage() {
                 const body =
                   item.type === "lost"
                     ? `Hi ${posterName},\n\nI saw your lost item post for "${item.title}" on Find On LU.\n\nI think I may have found something that matches. Could we coordinate a quick time to connect on campus?\n\nThanks!`
-                    : `Hi ${posterName},\n\nI'm messaging about your Find On LU found post "${item.title}". I think this item might be mine, and I'd like to coordinate a quick meet-up on campus to verify.\n\nThanks!`;
+                    : `Hi ${posterName},\n\nAbout your Find On LU found post "${item.title}"—I may have lost it. A few details I remember (so you can compare before we meet):\n\n\n\nIf it lines up, I'm happy to meet briefly on campus in a public place. Thanks!`;
 
                 if (!isMobileDevice()) {
                   openPrefilledEmail(item.user_email, subject, body);

@@ -129,3 +129,10 @@ Notes:
 ### My Posts
 ![Mypost-dashboard](./screenshots/mypost-dashboard.png)
 ![Mypost-edititem](./screenshots/mypost-edititem.png)
+
+### Help Page
+
+![HelpPage](./screenshots/HelpPage1.png)
+![HelpPage](./screenshots/HelpPage2.png)
+![HelpPage](./screenshots/HelpPage3.png)
+![HelpPage](./screenshots/HelpPage4.png)

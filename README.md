@@ -5,7 +5,8 @@ Find On LU is a full-stack web app I built for Lawrence University students to:
 - buy and sell secondhand items
 - contact posters quickly from desktop or mobile
 
-🌐 Live Demo: https://find-on-lu.vercel.app/dashboard  
+🌐 Live Website: [Visit Find On LU](https://find-on-lu.vercel.app/)  
+🌐 Demo Video: [Watch the Live Demo](https://youtu.be/b8PAzPnUi3o)  
 📽️ Presentation: [View Slides](./slides/find-on-lu-slides.pdf)
 
 ---
